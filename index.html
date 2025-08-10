@@ -286,7 +286,7 @@
                     setInterviewMessages(prev => [...prev, aiMessage]);
                     
                     // Move to next question
-                    if (currentQuestion < interviewQuestions.length - 2) {
+                    if (currentQuestion < interviewQuestions.length - 1) {
                         setCurrentQuestion(prev => prev + 1);
                     } else {
                         setShowSummary(true);
@@ -303,7 +303,7 @@
                     };
                     setInterviewMessages(prev => [...prev, fallbackMessage]);
                     
-                    if (currentQuestion < interviewQuestions.length - 2) {
+                    if (currentQuestion < interviewQuestions.length - 1) {
                         setCurrentQuestion(prev => prev + 1);
                     } else {
                         setShowSummary(true);
@@ -783,11 +783,11 @@
                                                         value={interviewInput}
                                                         onChange={(e) => setInterviewInput(e.target.value)}
                                                         onKeyPress={(e) => e.key === 'Enter' && handleInterviewSubmit(interviewInput)}
-                                                        disabled={currentQuestion >= interviewQuestions.length - 1 || isAiTyping}
+                                                        disabled={currentQuestion >= interviewQuestions.length || isAiTyping}
                                                     />
                                                     <button 
                                                         onClick={() => handleInterviewSubmit(interviewInput)}
-                                                        disabled={currentQuestion >= interviewQuestions.length - 1 || isAiTyping}
+                                                        disabled={currentQuestion >= interviewQuestions.length || isAiTyping}
                                                         className="bg-black text-white px-5 py-2.5 rounded-xl hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                                                     >
                                                         Send
@@ -836,13 +836,13 @@
                                         <div className="mb-6">
                                             <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                                                 <span>Interview Progress</span>
-                                                <span>{Math.min(currentQuestion + 1, interviewQuestions.length - 1)} of {interviewQuestions.length - 1} questions</span>
+                                                <span>{Math.min(currentQuestion + 1, interviewQuestions.length)} of {interviewQuestions.length} questions</span>
                                             </div>
                                             <div className="bg-gray-200 rounded-full h-2">
                                                 <div 
                                                     className="bg-purple-600 rounded-full h-2 transition-all duration-500"
                                                     style={{ 
-                                                        width: `${Math.min(((currentQuestion + 1) / (interviewQuestions.length - 1)) * 100, 100)}%` 
+                                                        width: `${Math.min(((currentQuestion + 1) / interviewQuestions.length) * 100, 100)}%` 
                                                     }}
                                                 />
                                             </div>
