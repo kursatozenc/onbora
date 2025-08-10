@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onbora - Help New Hires Belong from Day One</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-message { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function OnboraApp() {
+            const [currentView, setCurrentView] = useState('landing');
+            const [setupStep, setSetupStep] = useState(1);
+            const [companyData, setCompanyData] = useState({
+                name: '',
+                size: '',
+                industry: '',
+                documents: [],
+                culture: {}
+            });
+            const [interviewMessages, setInterviewMessages] = useState([]);
+            const [interviewInput, setInterviewInput] = useState('');
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [isAiTyping, setIsAiTyping] = useState(false);
+            const [showSummary, setShowSummary] = useState(false);
+            const interviewChatEndRef = useRef(null);
+            const [currentAgent, setCurrentAgent] = useState('maya');
+            const [messages, setMessages] = useState([]);
+            const [inputMessage, setInputMessage] = useState('');
+            const [checklistProgress, setChecklistProgress] = useState({
+                day1: [],
+                week1: [],
+                month1: []
+            });
+            const [activeChecklist, setActiveChecklist] = useState('day1');
+            const chatEndRef = useRef(null);
+
+            const interviewQuestions = [
+                "Welcome! I'm your AI interviewer. I'll help capture what makes your company special. Let's start with something simple - how would you describe your company culture in a few words?",
+                "That's great! Now, what are the core values that drive your team? What principles guide how you work together?",
+                "Perfect! What should new employees know about your work style? Are you more collaborative or independent? Fast-paced or methodical?",
+                "Excellent insights! What are the most important things a new hire should accomplish in their first day?",
+                "Very helpful! How about the first week - what key milestones should they hit?",
+                "Almost done! What unique traditions, perks, or aspects of your company would make new hires excited to join?",
+                "Last question - what's the one piece of advice you'd give to someone starting at your company tomorrow?",
+                "Thank you so much! I've captured everything I need to create a personalized onboarding experience for your new hires."
+            ];
+
+            const agents = {
+                maya: { 
+                    name: 'Maya', 
+                    role: 'Welcome Guide', 
+                    avatar: '👋',
+                    greeting: "Hi! I'm Maya, your welcome guide. I'm here to help you get settled in on your first day!",
+                    color: 'bg-purple-100 text-purple-800'
+                },
+                alex: { 
+                    name: 'Alex', 
+                    role: 'HR Assistant', 
+                    avatar: '📋',
+                    greeting: "Hello! I'm Alex from HR. I can help you with benefits, policies, and all the administrative stuff.",
+                    color: 'bg-blue-100 text-blue-800'
+                },
+                jordan: { 
+                    name: 'Jordan', 
+                    role: 'Culture Guide', 
+                    avatar: '🎯',
+                    greeting: "Hey there! I'm Jordan, your culture guide. Let me tell you about how we do things here!",
+                    color: 'bg-green-100 text-green-800'
+                },
+                sam: { 
+                    name: 'Sam', 
+                    role: 'Tech Setup', 
+                    avatar: '💻',
+                    greeting: "Hi! I'm Sam from IT. I'll help you get all your tools and accounts set up.",
+                    color: 'bg-orange-100 text-orange-800'
+                }
+            };
+
+            const checklists = {
+                day1: {
+                    title: 'First Day',
+                    items: [
+                        { id: 1, text: 'Complete office tour', completed: false },
+                        { id: 2, text: 'Set up your workspace', completed: false },
+                        { id: 3, text: 'Meet your team', completed: false },
+                        { id: 4, text: 'Review employee handbook', completed: false },
+                        { id: 5, text: 'Set up email and accounts', completed: false }
+                    ]
+                },
+                week1: {
+                    title: 'First Week',
+                    items: [
+                        { id: 6, text: 'Complete benefits enrollment', completed: false },
+                        { id: 7, text: 'Schedule 1-on-1 with manager', completed: false },
+                        { id: 8, text: 'Attend team meeting', completed: false },
+                        { id: 9, text: 'Review role expectations', completed: false },
+                        { id: 10, text: 'Complete initial training modules', completed: false }
+                    ]
+                },
+                month1: {
+                    title: 'First Month',
+                    items: [
+                        { id: 11, text: 'Complete 30-day check-in', completed: false },
+                        { id: 12, text: 'Set quarterly goals', completed: false },
+                        { id: 13, text: 'Join team project', completed: false },
+                        { id: 14, text: 'Provide onboarding feedback', completed: false },
+                        { id: 15, text: 'Build internal network', completed: false }
+                    ]
+                }
+            };
+
+            useEffect(() => {
+                if (currentView === 'employee' && messages.length === 0) {
+                    const agent = agents[currentAgent];
+                    setMessages([{
+                        id: Date.now(),
+                        agent: currentAgent,
+                        text: agent.greeting,
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }]);
+                }
+            }, [currentView]);
+
+            useEffect(() => {
+                if (chatEndRef.current) {
+                    chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [messages]);
+
+            useEffect(() => {
+                if (setupStep === 3 && interviewMessages.length === 0) {
+                    // Initialize the interview with the first question
+                    setInterviewMessages([{
+                        id: Date.now(),
+                        ai: true,
+                        text: interviewQuestions[0],
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }]);
+                }
+            }, [setupStep]);
+
+            useEffect(() => {
+                if (interviewChatEndRef.current) {
+                    interviewChatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [interviewMessages]);
+
+            const handleInterviewMessage = () => {
+                if (!interviewInput.trim()) return;
+                
+                // Add user's response
+                const userMessage = {
+                    id: Date.now(),
+                    user: true,
+                    text: interviewInput,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                
+                setInterviewMessages(prev => [...prev, userMessage]);
+                setInterviewInput('');
+                
+                // Store the response in company culture data
+                setCompanyData(prev => ({
+                    ...prev,
+                    culture: {
+                        ...prev.culture,
+                        [`question_${currentQuestion}`]: interviewInput
+                    }
+                }));
+                
+                // Show typing indicator
+                setIsAiTyping(true);
+                
+                // Move to next question after a delay
+                setTimeout(() => {
+                    setIsAiTyping(false);
+                    const nextQuestion = currentQuestion + 1;
+                    if (nextQuestion < interviewQuestions.length) {
+                        setCurrentQuestion(nextQuestion);
+                        setInterviewMessages(prev => [...prev, {
+                            id: Date.now() + 1,
+                            ai: true,
+                            text: interviewQuestions[nextQuestion],
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        }]);
+                        
+                        // Check if we've reached the thank you message
+                        if (nextQuestion === interviewQuestions.length - 1) {
+                            setTimeout(() => {
+                                setShowSummary(true);
+                            }, 2000);
+                        }
+                    }
+                }, 1500);
+            };
+
+            const generateSummary = () => {
+                const culture = companyData.culture;
+                return {
+                    culture: culture.question_0 || "Not specified",
+                    values: culture.question_1 || "Not specified",
+                    workStyle: culture.question_2 || "Not specified",
+                    firstDay: culture.question_3 || "Not specified",
+                    firstWeek: culture.question_4 || "Not specified",
+                    uniqueAspects: culture.question_5 || "Not specified",
+                    advice: culture.question_6 || "Not specified"
+                };
+            };
+
+            const handleFileUpload = (e) => {
+                const files = Array.from(e.target.files || e.dataTransfer.files || []);
+                setCompanyData(prev => ({
+                    ...prev,
+                    documents: [...prev.documents, ...files.map(f => f.name)]
+                }));
+            };
+
+            const handleSendMessage = () => {
+                if (!inputMessage.trim()) return;
+                
+                const userMessage = {
+                    id: Date.now(),
+                    user: true,
+                    text: inputMessage,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                };
+                
+                setMessages(prev => [...prev, userMessage]);
+                setInputMessage('');
+                
+                setTimeout(() => {
+                    const responses = {
+                        maya: [
+                            "Great question! Let me help you with that.",
+                            "That's exactly what most new hires ask about! Here's what you need to know...",
+                            "I'm so glad you asked! This is important for your first day."
+                        ],
+                        alex: [
+                            "I can definitely help you with that HR question.",
+                            "Let me pull up that information for you.",
+                            "That's covered in our employee handbook. Here's what you need to know..."
+                        ],
+                        jordan: [
+                            "Oh, that's a big part of our culture here!",
+                            "Great question about how we work together!",
+                            "Let me share how we typically approach that..."
+                        ],
+                        sam: [
+                            "I'll get that set up for you right away.",
+                            "That's a common tech question. Here's the solution...",
+                            "Let me walk you through the setup process."
+                        ]
+                    };
+                    
+                    const agentResponses = responses[currentAgent];
+                    const randomResponse = agentResponses[Math.floor(Math.random() * agentResponses.length)];
+                    
+                    setMessages(prev => [...prev, {
+                        id: Date.now() + 1,
+                        agent: currentAgent,
+                        text: randomResponse,
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    }]);
+                }, 1000);
+            };
+
+            const switchAgent = (agentKey) => {
+                setCurrentAgent(agentKey);
+                const agent = agents[agentKey];
+                setMessages(prev => [...prev, {
+                    id: Date.now(),
+                    agent: agentKey,
+                    text: agent.greeting,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                }]);
+            };
+
+            const toggleChecklistItem = (checklistKey, itemId) => {
+                setChecklistProgress(prev => {
+                    const updatedProgress = { ...prev };
+                    if (updatedProgress[checklistKey].includes(itemId)) {
+                        updatedProgress[checklistKey] = updatedProgress[checklistKey].filter(id => id !== itemId);
+                    } else {
+                        updatedProgress[checklistKey] = [...updatedProgress[checklistKey], itemId];
+                    }
+                    return updatedProgress;
+                });
+            };
+
+            if (currentView === 'landing') {
+                return (
+                    <div className="min-h-screen bg-white">
+                        <nav className="flex justify-between items-center px-8 py-6 border-b border-gray-100">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                                    <span className="text-white font-bold text-sm">O</span>
+                                </div>
+                                <span className="text-xl font-bold">Onbora</span>
+                            </div>
+                            <div className="flex items-center space-x-8">
+                                <button className="text-gray-600 hover:text-black transition">Features</button>
+                                <button className="text-gray-600 hover:text-black transition">How it Works</button>
+                                <button className="text-gray-600 hover:text-black transition">Pricing</button>
+                                <button 
+                                    onClick={() => setCurrentView('setup')}
+                                    className="bg-black text-white px-6 py-2.5 rounded-full hover:bg-gray-800 transition"
+                                >
+                                    Get Started
+                                </button>
+                            </div>
+                        </nav>
+
+                        <section className="max-w-6xl mx-auto px-8 py-20 text-center">
+                            <div className="animate-fade-in">
+                                <h1 className="text-7xl font-bold leading-tight mb-6">
+                                    Help New Hires<br />
+                                    Belong from Day One
+                                </h1>
+                                <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                                    Create personalized onboarding experiences that make every new employee 
+                                    feel welcomed, informed, and ready to contribute—without endless prep work for you.
+                                </p>
+                                <div className="flex justify-center space-x-4">
+                                    <button 
+                                        onClick={() => setCurrentView('setup')}
+                                        className="bg-black text-white px-8 py-4 rounded-full text-lg hover:bg-gray-800 transition"
+                                    >
+                                        Start Free Trial
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('employee')}
+                                        className="border-2 border-black text-black px-8 py-4 rounded-full text-lg hover:bg-gray-50 transition"
+                                    >
+                                        See Demo
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="bg-gray-50 py-20">
+                            <div className="max-w-6xl mx-auto px-8">
+                                <h2 className="text-5xl font-bold text-center mb-16">
+                                    Three Simple Steps
+                                </h2>
+                                <div className="grid md:grid-cols-3 gap-8">
+                                    <div className="bg-white p-8 rounded-3xl">
+                                        <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4">
+                                            1
+                                        </div>
+                                        <h3 className="text-2xl font-bold mb-3">Share Your Company</h3>
+                                        <p className="text-gray-600">
+                                            Upload your handbook and policies. No formatting needed—our AI handles everything.
+                                        </p>
+                                    </div>
+                                    <div className="bg-white p-8 rounded-3xl">
+                                        <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4">
+                                            2
+                                        </div>
+                                        <h3 className="text-2xl font-bold mb-3">Quick Chat with AI</h3>
+                                        <p className="text-gray-600">
+                                            10-minute conversation to capture your culture. No surveys, no complex setup.
+                                        </p>
+                                    </div>
+                                    <div className="bg-white p-8 rounded-3xl">
+                                        <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-4">
+                                            3
+                                        </div>
+                                        <h3 className="text-2xl font-bold mb-3">Agents Ready!</h3>
+                                        <p className="text-gray-600">
+                                            Your AI onboarding team is live. New hires get instant, personalized support.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="py-20">
+                            <div className="max-w-6xl mx-auto px-8">
+                                <h2 className="text-5xl font-bold text-center mb-16">
+                                    Meet Your AI Onboarding Team
+                                </h2>
+                                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {Object.entries(agents).map(([key, agent]) => (
+                                        <div key={key} className="border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition">
+                                            <div className="text-4xl mb-4">{agent.avatar}</div>
+                                            <h3 className="text-xl font-bold mb-2">{agent.name}</h3>
+                                            <p className="text-gray-600 text-sm">{agent.role}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="bg-black text-white py-20 rounded-t-3xl">
+                            <div className="max-w-4xl mx-auto text-center px-8">
+                                <h2 className="text-5xl font-bold mb-6">
+                                    Ready to Transform Your Onboarding?
+                                </h2>
+                                <p className="text-xl mb-8 text-gray-300">
+                                    Join forward-thinking companies creating better employee experiences
+                                </p>
+                                <button 
+                                    onClick={() => setCurrentView('setup')}
+                                    className="bg-white text-black px-8 py-4 rounded-full text-lg hover:bg-gray-100 transition"
+                                >
+                                    Get Started Free
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                );
+            }
+
+            if (currentView === 'setup') {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        <nav className="bg-white border-b border-gray-200 px-8 py-4">
+                            <div className="flex justify-between items-center">
+                                <div 
+                                    className="flex items-center space-x-2 cursor-pointer"
+                                    onClick={() => setCurrentView('landing')}
+                                >
+                                    <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                                        <span className="text-white font-bold text-sm">O</span>
+                                    </div>
+                                    <span className="text-xl font-bold">Onbora</span>
+                                </div>
+                                <button 
+                                    onClick={() => setCurrentView('landing')}
+                                    className="text-gray-600 hover:text-black transition text-2xl"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </nav>
+
+                        <div className="max-w-3xl mx-auto px-8 py-12">
+                            <div className="mb-12">
+                                <div className="flex justify-between mb-4">
+                                    {[1, 2, 3].map(step => (
+                                        <div 
+                                            key={step}
+                                            className={`flex items-center ${step < 3 ? 'flex-1' : ''}`}
+                                        >
+                                            <div 
+                                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold
+                                                    ${setupStep >= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-400'}`}
+                                            >
+                                                {step}
+                                            </div>
+                                            {step < 3 && (
+                                                <div className={`flex-1 h-1 mx-2 ${setupStep > step ? 'bg-black' : 'bg-gray-200'}`} />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm">Company Info</span>
+                                    <span className="text-sm">Upload Documents</span>
+                                    <span className="text-sm">Culture Interview</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-3xl p-8 shadow-sm animate-fade-in">
+                                {setupStep === 1 && (
+                                    <div>
+                                        <h2 className="text-3xl font-bold mb-6">Tell us about your company</h2>
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Company Name</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                                    placeholder="Acme Inc."
+                                                    value={companyData.name}
+                                                    onChange={(e) => setCompanyData(prev => ({ ...prev, name: e.target.value }))}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Company Size</label>
+                                                <select 
+                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                                    value={companyData.size}
+                                                    onChange={(e) => setCompanyData(prev => ({ ...prev, size: e.target.value }))}
+                                                >
+                                                    <option value="">Select size</option>
+                                                    <option value="1-10">1-10 employees</option>
+                                                    <option value="11-50">11-50 employees</option>
+                                                    <option value="51-200">51-200 employees</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Industry</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                                    placeholder="Technology, Healthcare, etc."
+                                                    value={companyData.industry}
+                                                    onChange={(e) => setCompanyData(prev => ({ ...prev, industry: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => setSetupStep(2)}
+                                            className="w-full bg-black text-white py-3 rounded-xl mt-8 hover:bg-gray-800 transition"
+                                        >
+                                            Continue
+                                        </button>
+                                    </div>
+                                )}
+
+                                {setupStep === 2 && (
+                                    <div>
+                                        <h2 className="text-3xl font-bold mb-6">Upload your documents</h2>
+                                        <p className="text-gray-600 mb-6">
+                                            Add your employee handbook, policies, or any onboarding materials. 
+                                            Don't worry about formatting—we'll handle that!
+                                        </p>
+                                        <div 
+                                            className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-black transition cursor-pointer"
+                                            onDragOver={(e) => e.preventDefault()}
+                                            onDrop={(e) => {
+                                                e.preventDefault();
+                                                handleFileUpload(e);
+                                            }}
+                                            onClick={() => document.getElementById('fileInput').click()}
+                                        >
+                                            <div className="text-5xl mb-4">📁</div>
+                                            <p className="text-lg font-medium mb-2">Drop files here or click to upload</p>
+                                            <p className="text-sm text-gray-500">PDF, DOC, TXT up to 10MB each</p>
+                                            <input
+                                                id="fileInput"
+                                                type="file"
+                                                multiple
+                                                className="hidden"
+                                                onChange={handleFileUpload}
+                                            />
+                                        </div>
+                                        {companyData.documents.length > 0 && (
+                                            <div className="mt-6 space-y-2">
+                                                {companyData.documents.map((doc, index) => (
+                                                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                        <div className="flex items-center space-x-3">
+                                                            <span>📄</span>
+                                                            <span className="text-sm">{doc}</span>
+                                                        </div>
+                                                        <span className="text-green-600">✓</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <div className="flex space-x-4 mt-8">
+                                            <button 
+                                                onClick={() => setSetupStep(1)}
+                                                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl hover:bg-gray-50 transition"
+                                            >
+                                                Back
+                                            </button>
+                                            <button 
+                                                onClick={() => setSetupStep(3)}
+                                                className="flex-1 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition"
+                                            >
+                                                Continue
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {setupStep === 3 && (
+                                    <div>
+                                        <h2 className="text-3xl font-bold mb-6">Let's capture your culture</h2>
+                                        <p className="text-gray-600 mb-8">
+                                            I'll have a quick conversation with you to understand what makes your company special. 
+                                            This usually takes about 10 minutes.
+                                        </p>
+                                        
+                                        {/* Chat Interface */}
+                                        <div className="bg-gray-50 rounded-2xl p-4 mb-4" style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
+                                            {/* Messages Area */}
+                                            <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+                                                {interviewMessages.map(message => (
+                                                    <div 
+                                                        key={message.id}
+                                                        className={`flex ${message.user ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                                                    >
+                                                        <div className={`max-w-lg ${message.user ? 'order-2' : 'order-1'}`}>
+                                                            {!message.user && (
+                                                                <div className="flex items-center space-x-2 mb-2">
+                                                                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                                                        <span>🤖</span>
+                                                                    </div>
+                                                                    <span className="text-sm font-medium">AI Interviewer</span>
+                                                                </div>
+                                                            )}
+                                                            <div className={`rounded-2xl px-4 py-3 ${
+                                                                message.user 
+                                                                    ? 'bg-black text-white ml-12' 
+                                                                    : 'bg-white border border-gray-200 mr-12'
+                                                            }`}>
+                                                                <p className={message.user ? 'text-white' : 'text-gray-800'}>
+                                                                    {message.text}
+                                                                </p>
+                                                            </div>
+                                                            <p className="text-xs text-gray-500 mt-1 px-2">
+                                                                {message.timestamp}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                
+                                                {/* Typing Indicator */}
+                                                {isAiTyping && (
+                                                    <div className="flex justify-start animate-fade-in">
+                                                        <div>
+                                                            <div className="flex items-center space-x-2 mb-2">
+                                                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                                                    <span>🤖</span>
+                                                                </div>
+                                                                <span className="text-sm font-medium">AI Interviewer</span>
+                                                            </div>
+                                                            <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 mr-12">
+                                                                <div className="flex space-x-1">
+                                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                                                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                <div ref={interviewChatEndRef} />
+                                            </div>
+                                            
+                                            {/* Input Area */}
+                                            <div className="border-t border-gray-200 pt-4">
+                                                <div className="flex space-x-3">
+                                                    <input
+                                                        type="text"
+                                                        className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                                        placeholder="Type your answer here..."
+                                                        value={interviewInput}
+                                                        onChange={(e) => setInterviewInput(e.target.value)}
+                                                        onKeyPress={(e) => e.key === 'Enter' && handleInterviewMessage()}
+                                                        disabled={currentQuestion >= interviewQuestions.length - 1 || isAiTyping}
+                                                    />
+                                                    <button 
+                                                        onClick={handleInterviewMessage}
+                                                        disabled={currentQuestion >= interviewQuestions.length - 1 || isAiTyping}
+                                                        className="bg-black text-white px-5 py-2.5 rounded-xl hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                                    >
+                                                        Send
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Culture Summary */}
+                                        {showSummary && (
+                                            <div className="bg-purple-50 border border-purple-200 rounded-2xl p-6 mb-6 animate-fade-in">
+                                                <h3 className="text-lg font-bold mb-4 flex items-center">
+                                                    <span className="mr-2">📋</span> Culture Profile Summary
+                                                </h3>
+                                                <div className="space-y-3 text-sm">
+                                                    <div>
+                                                        <span className="font-semibold text-purple-900">Company Culture:</span>
+                                                        <p className="text-gray-700 mt-1">{generateSummary().culture}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-purple-900">Core Values:</span>
+                                                        <p className="text-gray-700 mt-1">{generateSummary().values}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-purple-900">Work Style:</span>
+                                                        <p className="text-gray-700 mt-1">{generateSummary().workStyle}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-purple-900">First Day Goals:</span>
+                                                        <p className="text-gray-700 mt-1">{generateSummary().firstDay}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-purple-900">Unique Aspects:</span>
+                                                        <p className="text-gray-700 mt-1">{generateSummary().uniqueAspects}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 pt-4 border-t border-purple-200">
+                                                    <p className="text-xs text-purple-700">
+                                                        ✨ This culture profile will be used to personalize your AI onboarding agents
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Progress Indicator */}
+                                        <div className="mb-6">
+                                            <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                                                <span>Interview Progress</span>
+                                                <span>{Math.min(currentQuestion + 1, interviewQuestions.length - 1)} of {interviewQuestions.length - 1} questions</span>
+                                            </div>
+                                            <div className="bg-gray-200 rounded-full h-2">
+                                                <div 
+                                                    className="bg-purple-600 rounded-full h-2 transition-all duration-500"
+                                                    style={{ 
+                                                        width: `${Math.min(((currentQuestion + 1) / (interviewQuestions.length - 1)) * 100, 100)}%` 
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex space-x-4">
+                                            <button 
+                                                onClick={() => {
+                                                    setSetupStep(2);
+                                                    setInterviewMessages([]);
+                                                    setCurrentQuestion(0);
+                                                    setShowSummary(false);
+                                                    setIsAiTyping(false);
+                                                }}
+                                                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl hover:bg-gray-50 transition"
+                                            >
+                                                Back
+                                            </button>
+                                            <button 
+                                                onClick={() => setCurrentView('employee')}
+                                                disabled={!showSummary}
+                                                className="flex-1 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                            >
+                                                {!showSummary ? 'Complete Interview First' : 'Complete Setup'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (currentView === 'employee') {
+                return (
+                    <div className="flex h-screen bg-gray-50">
+                        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+                            <div className="p-6 border-b border-gray-100">
+                                <div 
+                                    className="flex items-center space-x-2 cursor-pointer"
+                                    onClick={() => setCurrentView('landing')}
+                                >
+                                    <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                                        <span className="text-white font-bold text-sm">O</span>
+                                    </div>
+                                    <span className="text-xl font-bold">Onbora</span>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-2">Your AI Onboarding Team</p>
+                            </div>
+
+                            <div className="p-4">
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Available Agents</h3>
+                                <div className="space-y-2">
+                                    {Object.entries(agents).map(([key, agent]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => switchAgent(key)}
+                                            className={`w-full flex items-center space-x-3 p-3 rounded-xl transition
+                                                ${currentAgent === key ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                                        >
+                                            <div className="text-2xl">{agent.avatar}</div>
+                                            <div className="text-left">
+                                                <p className="font-medium text-sm">{agent.name}</p>
+                                                <p className="text-xs text-gray-600">{agent.role}</p>
+                                            </div>
+                                            {currentAgent === key && (
+                                                <div className="ml-auto w-2 h-2 bg-green-500 rounded-full"></div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-4 flex-1 overflow-y-auto">
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">Your Progress</h3>
+                                <div className="space-y-2">
+                                    {Object.entries(checklists).map(([key, checklist]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setActiveChecklist(key)}
+                                            className={`w-full text-left p-3 rounded-xl transition
+                                                ${activeChecklist === key ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-medium text-sm">{checklist.title}</span>
+                                                <span className="text-xs text-gray-500">
+                                                    {checklistProgress[key].length}/{checklist.items.length}
+                                                </span>
+                                            </div>
+                                            <div className="mt-2 bg-gray-200 rounded-full h-1.5">
+                                                <div 
+                                                    className="bg-black rounded-full h-1.5 transition-all"
+                                                    style={{ 
+                                                        width: `${(checklistProgress[key].length / checklist.items.length) * 100}%` 
+                                                    }}
+                                                />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-4 border-t border-gray-100">
+                                <button 
+                                    onClick={() => setCurrentView('landing')}
+                                    className="w-full flex items-center justify-center space-x-2 py-2 text-sm text-gray-600 hover:text-black transition"
+                                >
+                                    <span>← Exit Demo</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col">
+                            <div className="bg-white border-b border-gray-200 px-6 py-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="text-3xl">{agents[currentAgent].avatar}</div>
+                                        <div>
+                                            <h2 className="font-semibold">{agents[currentAgent].name}</h2>
+                                            <p className="text-sm text-gray-600">{agents[currentAgent].role}</p>
+                                        </div>
+                                        <div className="flex items-center space-x-1 ml-3">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                            <span className="text-xs text-gray-500">Online</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6">
+                                <div className="max-w-3xl mx-auto space-y-4">
+                                    {messages.map(message => (
+                                        <div 
+                                            key={message.id}
+                                            className={`flex ${message.user ? 'justify-end' : 'justify-start'} chat-message`}
+                                        >
+                                            <div className={`max-w-md ${message.user ? 'order-2' : 'order-1'}`}>
+                                                <div className={`rounded-2xl px-4 py-3 ${
+                                                    message.user 
+                                                        ? 'bg-black text-white' 
+                                                        : 'bg-white border border-gray-200'
+                                                }`}>
+                                                    {!message.user && (
+                                                        <div className="flex items-center space-x-2 mb-1">
+                                                            <span className="text-xs font-medium">
+                                                                {agents[message.agent]?.name}
+                                                            </span>
+                                                            <span className={`text-xs px-2 py-0.5 rounded-full ${agents[message.agent]?.color}`}>
+                                                                {agents[message.agent]?.role}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                    <p className={message.user ? 'text-white' : 'text-gray-800'}>
+                                                        {message.text}
+                                                    </p>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-1 px-2">
+                                                    {message.timestamp}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div ref={chatEndRef} />
+                                </div>
+                            </div>
+
+                            <div className="bg-white border-t border-gray-200 p-4">
+                                <div className="max-w-3xl mx-auto">
+                                    <div className="flex space-x-4">
+                                        <input
+                                            type="text"
+                                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                            placeholder={`Ask ${agents[currentAgent].name} anything...`}
+                                            value={inputMessage}
+                                            onChange={(e) => setInputMessage(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                        />
+                                        <button 
+                                            onClick={handleSendMessage}
+                                            className="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition flex items-center space-x-2"
+                                        >
+                                            <span>Send</span>
+                                            <span>→</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="w-96 bg-white border-l border-gray-200 p-6 overflow-y-auto">
+                            <h3 className="text-lg font-semibold mb-4">
+                                {checklists[activeChecklist].title} Checklist
+                            </h3>
+                            <div className="space-y-3">
+                                {checklists[activeChecklist].items.map(item => (
+                                    <label 
+                                        key={item.id}
+                                        className="flex items-start space-x-3 cursor-pointer group"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            className="mt-1 w-5 h-5 rounded border-gray-300 text-black focus:ring-black"
+                                            checked={checklistProgress[activeChecklist].includes(item.id)}
+                                            onChange={() => toggleChecklistItem(activeChecklist, item.id)}
+                                        />
+                                        <span className={`text-sm ${
+                                            checklistProgress[activeChecklist].includes(item.id) 
+                                                ? 'line-through text-gray-500' 
+                                                : 'text-gray-800'
+                                        }`}>
+                                            {item.text}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                            
+                            {checklistProgress[activeChecklist].length === checklists[activeChecklist].items.length && (
+                                <div className="mt-6 p-4 bg-green-50 rounded-xl">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-green-600">✓</span>
+                                        <span className="text-sm font-medium text-green-800">
+                                            {checklists[activeChecklist].title} Complete! 🎉
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+
+            return null;
+        }
+
+        ReactDOM.render(<OnboraApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
