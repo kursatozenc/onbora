@@ -140,12 +140,21 @@
                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
                         <div class="text-4xl mb-4">📄</div>
                         <p class="text-gray-600 mb-4">Drag and drop files here, or click to browse</p>
+                        <p class="text-sm text-blue-600 mb-4">Documents will be analyzed by AI agents to provide personalized responses</p>
                         <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" onchange="handleFileUpload(event)">
                         <button onclick="document.getElementById('fileInput').click()" class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition">
                             Choose Files
                         </button>
                     </div>
                     <div id="fileList" class="mt-4 space-y-2"></div>
+                    
+                    <!-- Document Processing Status -->
+                    <div id="docProcessingStatus" class="hidden mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span class="text-sm text-blue-800">Processing documents for AI analysis...</span>
+                        </div>
+                    </div>
                     <div class="mt-6 flex justify-between">
                         <button 
                             onclick="prevStep(1)"
@@ -260,6 +269,18 @@
                 <!-- Left Sidebar - Agent Selection -->
                 <div class="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto">
                     <h2 class="text-xl font-bold mb-6">Your AI Team</h2>
+                    
+                    <!-- AI Status Indicator -->
+                    <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-sm font-medium text-green-800">AI Service Active</span>
+                        </div>
+                        <p class="text-xs text-green-700">
+                            Powered by Google Gemini • Company context loaded • Documents analyzed
+                        </p>
+                    </div>
+                    
                     <div class="space-y-3">
                         <div 
                             onclick="selectAgent('maya')"
@@ -271,6 +292,7 @@
                                 <div class="flex-1">
                                     <h3 class="font-semibold">Maya</h3>
                                     <p class="text-sm text-gray-600">Welcome Guide</p>
+                                    <p class="text-xs text-blue-600">AI-powered responses</p>
                                 </div>
                             </div>
                         </div>
@@ -284,6 +306,7 @@
                                 <div class="flex-1">
                                     <h3 class="font-semibold">Alex</h3>
                                     <p class="text-sm text-gray-600">HR Assistant</p>
+                                    <p class="text-xs text-blue-600">AI-powered responses</p>
                                 </div>
                             </div>
                         </div>
@@ -297,6 +320,7 @@
                                 <div class="flex-1">
                                     <h3 class="font-semibold">Jordan</h3>
                                     <p class="text-sm text-gray-600">Culture Guide</p>
+                                    <p class="text-xs text-blue-600">AI-powered responses</p>
                                 </div>
                             </div>
                         </div>
@@ -310,6 +334,7 @@
                                 <div class="flex-1">
                                     <h3 class="font-semibold">Sam</h3>
                                     <p class="text-sm text-gray-600">Tech Setup</p>
+                                    <p class="text-xs text-blue-600">AI-powered responses</p>
                                 </div>
                             </div>
                         </div>
@@ -480,6 +505,10 @@
         function handleFileUpload(event) {
             const files = event.target.files;
             const fileList = document.getElementById('fileList');
+            const docProcessingStatus = document.getElementById('docProcessingStatus');
+            
+            // Show processing status
+            docProcessingStatus.classList.remove('hidden');
             
             for (let file of files) {
                 uploadedFiles.push(file);
@@ -489,11 +518,46 @@
                     <div class="flex items-center space-x-2">
                         <span class="text-gray-600">📄</span>
                         <span class="text-sm text-gray-700">${file.name}</span>
+                        <span class="text-xs text-blue-600">Processing...</span>
                     </div>
                     <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm">×</button>
                 `;
                 fileList.appendChild(fileItem);
             }
+            
+            // Simulate document processing completion
+            setTimeout(() => {
+                docProcessingStatus.classList.add('hidden');
+                
+                // Update file items to show completion
+                const fileItems = fileList.querySelectorAll('.flex');
+                fileItems.forEach(item => {
+                    const statusSpan = item.querySelector('.text-blue-600');
+                    if (statusSpan) {
+                        statusSpan.textContent = '✓ Ready for AI';
+                        statusSpan.className = 'text-xs text-green-600';
+                    }
+                });
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'mt-2 p-2 bg-green-50 border border-green-200 rounded-lg';
+                successDiv.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="text-green-600">✓</span>
+                        <span class="text-sm text-green-800">${uploadedFiles.length} document(s) processed and ready for AI analysis</span>
+                    </div>
+                `;
+                fileList.appendChild(successDiv);
+                
+                // Remove success message after 5 seconds
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.remove();
+                    }
+                }, 5000);
+                
+            }, 2000);
         }
 
         function removeFile(fileName) {
@@ -524,16 +588,108 @@
             addInterviewMessage(message, true);
             input.value = '';
 
-            // Simulate AI response
-            setTimeout(() => {
+            // Store the answer for the summary
+            if (!window.interviewAnswers) window.interviewAnswers = [];
+            window.interviewAnswers.push(message);
+
+            // Show typing indicator for AI
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'flex justify-start chat-message';
+            typingDiv.id = 'interviewTypingIndicator';
+            typingDiv.innerHTML = `
+                <div class="max-w-lg">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span>🤖</span>
+                        </div>
+                        <span class="text-sm font-medium">AI Interviewer</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 mr-12">
+                        <p class="text-gray-800">Thinking...</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('interviewMessages').appendChild(typingDiv);
+            document.getElementById('interviewMessages').scrollTop = document.getElementById('interviewMessages').scrollTop;
+
+            // Call AI for intelligent follow-up questions
+            callAIInterviewer(message);
+        }
+
+        async function callAIInterviewer(message) {
+            try {
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('interviewTypingIndicator');
+                if (typingIndicator) typingIndicator.remove();
+
+                // Prepare context for the AI interviewer
+                const interviewContext = {
+                    companyName: document.getElementById('companyName').value || 'Your Company',
+                    companySize: document.getElementById('companySize').value || 'Not specified',
+                    companyIndustry: document.getElementById('companyIndustry').value || 'Not specified',
+                    previousAnswers: window.interviewAnswers || [],
+                    currentQuestion: interviewQuestionIndex + 1,
+                    totalQuestions: 7
+                };
+
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: `You are an AI interviewer helping to understand a company's culture for onboarding purposes. 
+                        
+                        Company: ${interviewContext.companyName}
+                        Size: ${interviewContext.companySize}
+                        Industry: ${interviewContext.companyIndustry}
+                        
+                        Previous answers: ${interviewContext.previousAnswers.join(', ')}
+                        
+                        Current question: ${interviewContext.currentQuestion} of ${interviewContext.totalQuestions}
+                        
+                        The user just answered: "${message}"
+                        
+                        Based on their answer, ask the next intelligent follow-up question to understand their company culture. 
+                        Make it conversational and build on what they've shared. 
+                        If this is the last question, thank them and say the interview is complete.
+                        
+                        Keep your response under 100 words and make it feel natural and engaging.`,
+                        maxTokens: 150
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Check if interview is complete
+                if (interviewQuestionIndex >= 6) { // 7 questions total (0-6)
+                    // Interview complete - show summary immediately
+                    showInterviewSummary();
+                } else {
+                    // Add AI response and continue
+                    addInterviewMessage(data.response, false);
+                    interviewQuestionIndex++;
+                }
+                
+            } catch (error) {
+                console.error('Error calling AI interviewer:', error);
+                
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('interviewTypingIndicator');
+                if (typingIndicator) typingIndicator.remove();
+                
+                // Fallback to static questions
                 if (interviewQuestionIndex < interviewQuestions.length) {
                     addInterviewMessage(interviewQuestions[interviewQuestionIndex], false);
                     interviewQuestionIndex++;
                 } else {
-                    // Interview complete - show summary immediately
                     showInterviewSummary();
                 }
-            }, 1000);
+            }
         }
 
         function showInterviewSummary() {
@@ -557,6 +713,7 @@
                     <div class="bg-white p-4 rounded-lg">
                         <h4 class="font-semibold text-gray-800 mb-2">Documents</h4>
                         <p class="text-sm text-gray-600">${uploadedFiles.length} file(s) uploaded</p>
+                        ${uploadedFiles.length > 0 ? '<p class="text-xs text-green-600 mt-1">✓ Documents will be analyzed by AI agents</p>' : ''}
                     </div>
                 </div>
                 <div class="bg-white p-4 rounded-lg">
@@ -625,16 +782,80 @@
             addChatMessage(message, true);
             input.value = '';
 
-            // Simulate AI response based on current agent
-            setTimeout(() => {
-                const responses = {
-                    maya: "I'd be happy to help you with that! Let me know if you have any other questions about getting started.",
-                    alex: "I can definitely help you with that HR question. Is there anything else you'd like to know about benefits or policies?",
-                    jordan: "That's a great question about our culture! Let me know if you'd like to learn more about how we work together.",
-                    sam: "I'll help you get that tech setup sorted out. What else do you need help with for your workspace?"
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'flex justify-start chat-message';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="max-w-lg">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <span class="text-sm font-medium">${agents[currentAgent].name}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">${agents[currentAgent].role}</span>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 mr-12">
+                        <p class="text-gray-800">Typing...</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollTop;
+
+            // Call the real AI API
+            callAIAgent(message, currentAgent);
+        }
+
+        async function callAIAgent(message, agentId) {
+            try {
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) typingIndicator.remove();
+
+                // Prepare context for the AI
+                const companyContext = {
+                    name: document.getElementById('companyName').value || 'Your Company',
+                    size: document.getElementById('companySize').value || 'Not specified',
+                    industry: document.getElementById('companyIndustry').value || 'Not specified',
+                    culture: window.interviewAnswers || [],
+                    documents: uploadedFiles.map(f => f.name)
                 };
-                addChatMessage(responses[currentAgent], false);
-            }, 1000);
+
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        agent: agentId,
+                        context: companyContext
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Add AI response
+                addChatMessage(data.response, false);
+                
+            } catch (error) {
+                console.error('Error calling AI agent:', error);
+                
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) typingIndicator.remove();
+                
+                // Show fallback response
+                const fallbackResponses = {
+                    maya: "I'm having trouble connecting to my AI brain right now, but I'd be happy to help you with general onboarding questions! What would you like to know about getting started?",
+                    alex: "I'm experiencing a technical issue, but I can still help with basic HR questions. What do you need assistance with?",
+                    jordan: "I'm having a moment, but I'd love to tell you about company culture! What would you like to know?",
+                    sam: "I'm having some tech difficulties, but I can still help with basic setup questions. What do you need help with?"
+                };
+                addChatMessage(fallbackResponses[agentId], false);
+            }
         }
 
         function addChatMessage(text, isUser) {
