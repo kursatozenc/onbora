@@ -53,8 +53,8 @@
 ### **Local Development**
 ```bash
 # Clone the repository
-git clone https://github.com/kursatozenc/onbora-app.git
-cd onbora-app
+git clone https://github.com/kursatozenc/onbora.git
+cd onbora
 
 # Open index.html in your browser
 open index.html

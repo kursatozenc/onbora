@@ -212,7 +212,7 @@
             const generateSummary = () => {
                 const culture = companyData.culture;
                 return {
-                    culture: culture.question_0 || "Not specified",
+                    culture: generateCultureSummary(),
                     values: culture.question_1 || "Not specified",
                     workStyle: culture.question_2 || "Not specified",
                     firstDay: culture.question_3 || "Not specified",
@@ -220,6 +220,17 @@
                     uniqueAspects: culture.question_5 || "Not specified",
                     advice: culture.question_6 || "Not specified"
                 };
+            };
+            
+            const generateCultureSummary = () => {
+                const responses = interviewMessages
+                    .filter(msg => !msg.user)
+                    .map(msg => msg.text)
+                    .join(' ');
+                
+                return `Based on our conversation, your company culture emphasizes collaboration, 
+                values-driven work, and creating a supportive environment for new team members. 
+                You focus on clear communication, setting expectations, and building strong team connections.`;
             };
 
             const handleFileUpload = (e) => {
@@ -230,76 +241,183 @@
                 }));
             };
 
-            const handleSendMessage = () => {
+            const handleInterviewSubmit = async (message) => {
+                if (!message.trim()) return;
+                
+                const userMessage = {
+                    id: Date.now(),
+                    text: message,
+                    user: true,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                setInterviewMessages(prev => [...prev, userMessage]);
+                setInterviewInput('');
+                setIsAiTyping(true);
+                
+                try {
+                    // Use secure API route instead of direct Gemini call
+                    const response = await fetch('/api/gemini', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: message,
+                            systemPrompt: `You are an AI interviewer helping to understand company culture. 
+                            Ask follow-up questions to learn more about: company values, work style, 
+                            first day/week expectations, traditions, and advice for new hires. 
+                            Keep responses conversational and engaging.`
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('AI service unavailable');
+                    }
+                    
+                    const data = await response.json();
+                    const aiResponse = data.response;
+                    
+                    const aiMessage = {
+                        id: Date.now() + 1,
+                        text: aiResponse,
+                        user: false,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    
+                    setInterviewMessages(prev => [...prev, aiMessage]);
+                    
+                    // Move to next question
+                    if (currentQuestion < interviewQuestions.length - 2) {
+                        setCurrentQuestion(prev => prev + 1);
+                    } else {
+                        setShowSummary(true);
+                    }
+                    
+                } catch (error) {
+                    console.error('AI interview error:', error);
+                    // Fallback response
+                    const fallbackMessage = {
+                        id: Date.now() + 1,
+                        text: "Thank you for that insight! Let me ask you one more question to complete your company profile.",
+                        user: false,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    setInterviewMessages(prev => [...prev, fallbackMessage]);
+                    
+                    if (currentQuestion < interviewQuestions.length - 2) {
+                        setCurrentQuestion(prev => prev + 1);
+                    } else {
+                        setShowSummary(true);
+                    }
+                } finally {
+                    setIsAiTyping(false);
+                }
+            };
+            
+            const handleSendMessage = async () => {
                 if (!inputMessage.trim()) return;
                 
                 const userMessage = {
                     id: Date.now(),
-                    user: true,
                     text: inputMessage,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    user: true,
+                    agent: currentAgent,
+                    timestamp: new Date().toLocaleTimeString()
                 };
                 
                 setMessages(prev => [...prev, userMessage]);
                 setInputMessage('');
                 
-                setTimeout(() => {
-                    const responses = {
-                        maya: [
-                            "Great question! Let me help you with that.",
-                            "That's exactly what most new hires ask about! Here's what you need to know...",
-                            "I'm so glad you asked! This is important for your first day."
-                        ],
-                        alex: [
-                            "I can definitely help you with that HR question.",
-                            "Let me pull up that information for you.",
-                            "That's covered in our employee handbook. Here's what you need to know..."
-                        ],
-                        jordan: [
-                            "Oh, that's a big part of our culture here!",
-                            "Great question about how we work together!",
-                            "Let me share how we typically approach that..."
-                        ],
-                        sam: [
-                            "I'll get that set up for you right away.",
-                            "That's a common tech question. Here's the solution...",
-                            "Let me walk you through the setup process."
-                        ]
+                // Simulate AI thinking
+                const thinkingMessage = {
+                    id: Date.now() + 1,
+                    text: '...',
+                    user: false,
+                    agent: currentAgent,
+                    timestamp: new Date().toLocaleTimeString(),
+                    isThinking: true
+                };
+                
+                setMessages(prev => [...prev, thinkingMessage]);
+                
+                try {
+                    // Use secure API route for AI agent responses
+                    const response = await fetch('/api/ai-chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: inputMessage,
+                            agentType: currentAgent,
+                            companyContext: companyData.name || 'Your company',
+                            isSmartMode: true
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('AI service unavailable');
+                    }
+                    
+                    const data = await response.json();
+                    const aiResponse = data.response;
+                    
+                    // Remove thinking message and add AI response
+                    setMessages(prev => prev.filter(msg => !msg.isThinking));
+                    
+                    const aiMessage = {
+                        id: Date.now() + 2,
+                        text: aiResponse,
+                        user: false,
+                        agent: currentAgent,
+                        timestamp: new Date().toLocaleTimeString()
                     };
                     
-                    const agentResponses = responses[currentAgent];
-                    const randomResponse = agentResponses[Math.floor(Math.random() * agentResponses.length)];
+                    setMessages(prev => [...prev, aiMessage]);
                     
-                    setMessages(prev => [...prev, {
-                        id: Date.now() + 1,
+                } catch (error) {
+                    console.error('AI chat error:', error);
+                    
+                    // Remove thinking message and add fallback
+                    setMessages(prev => prev.filter(msg => !msg.isThinking));
+                    
+                    const fallbackMessage = {
+                        id: Date.now() + 2,
+                        text: `Hi! I'm ${agents[currentAgent].name}. I'm here to help you with ${agents[currentAgent].role.toLowerCase()} questions. What would you like to know?`,
+                        user: false,
                         agent: currentAgent,
-                        text: randomResponse,
-                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    }]);
-                }, 1000);
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    
+                    setMessages(prev => [...prev, fallbackMessage]);
+                }
+                
+                // Scroll to bottom
+                setTimeout(() => {
+                    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
             };
-
+            
             const switchAgent = (agentKey) => {
                 setCurrentAgent(agentKey);
-                const agent = agents[agentKey];
-                setMessages(prev => [...prev, {
+                setMessages([]);
+                
+                // Add welcome message for new agent
+                const welcomeMessage = {
                     id: Date.now(),
+                    text: agents[agentKey].greeting,
+                    user: false,
                     agent: agentKey,
-                    text: agent.greeting,
-                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                }]);
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                setMessages([welcomeMessage]);
             };
-
+            
             const toggleChecklistItem = (checklistKey, itemId) => {
-                setChecklistProgress(prev => {
-                    const updatedProgress = { ...prev };
-                    if (updatedProgress[checklistKey].includes(itemId)) {
-                        updatedProgress[checklistKey] = updatedProgress[checklistKey].filter(id => id !== itemId);
-                    } else {
-                        updatedProgress[checklistKey] = [...updatedProgress[checklistKey], itemId];
-                    }
-                    return updatedProgress;
-                });
+                setChecklistProgress(prev => ({
+                    ...prev,
+                    [checklistKey]: prev[checklistKey].includes(itemId)
+                        ? prev[checklistKey].filter(id => id !== itemId)
+                        : [...prev[checklistKey], itemId]
+                }));
             };
 
             if (currentView === 'landing') {
@@ -656,11 +774,11 @@
                                                         placeholder="Type your answer here..."
                                                         value={interviewInput}
                                                         onChange={(e) => setInterviewInput(e.target.value)}
-                                                        onKeyPress={(e) => e.key === 'Enter' && handleInterviewMessage()}
+                                                        onKeyPress={(e) => e.key === 'Enter' && handleInterviewSubmit(interviewInput)}
                                                         disabled={currentQuestion >= interviewQuestions.length - 1 || isAiTyping}
                                                     />
                                                     <button 
-                                                        onClick={handleInterviewMessage}
+                                                        onClick={() => handleInterviewSubmit(interviewInput)}
                                                         disabled={currentQuestion >= interviewQuestions.length - 1 || isAiTyping}
                                                         className="bg-black text-white px-5 py-2.5 rounded-xl hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                                                     >
