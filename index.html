@@ -20,6 +20,15 @@
 <body>
     <div id="root"></div>
     <script type="text/babel">
+        // Add error handling and debugging
+        try {
+            console.log('React loaded:', !!React);
+            console.log('ReactDOM loaded:', !!ReactDOM);
+            console.log('Babel loaded:', !!Babel);
+        } catch (error) {
+            console.error('Error loading dependencies:', error);
+        }
+        
         const { useState, useEffect, useRef } = React;
 
         function OnboraApp() {
@@ -1297,7 +1306,20 @@
             return null;
         }
 
-        ReactDOM.render(<OnboraApp />, document.getElementById('root'));
+        try {
+            console.log('Starting React render...');
+            ReactDOM.render(<OnboraApp />, document.getElementById('root'));
+            console.log('React render completed successfully');
+        } catch (error) {
+            console.error('React render error:', error);
+            document.getElementById('root').innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <h2>Something went wrong</h2>
+                    <p>Error: ${error.message}</p>
+                    <p>Please check the console for more details.</p>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
