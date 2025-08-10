@@ -414,7 +414,7 @@
 
         function showView(viewName) {
             // Hide all views
-            document.querySelectorAll('#landing, #setup, #preview, #employee').forEach(el => {
+            document.querySelectorAll('[id$="Page"], #landing, #setup, #preview, #employee').forEach(el => {
                 if (el) el.classList.add('hidden');
             });
             
@@ -562,4 +562,4 @@
         });
     </script>
 </body>
-</html>
+</html> 

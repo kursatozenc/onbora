@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onbora Test</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        console.log('Script starting...');
+        console.log('React:', !!React);
+        console.log('ReactDOM:', !!ReactDOM);
+        console.log('Babel:', !!Babel);
+        
+        function TestApp() {
+            const [count, setCount] = React.useState(0);
+            
+            return React.createElement('div', { style: { padding: '20px' } },
+                React.createElement('h1', null, 'Onbora Test App'),
+                React.createElement('p', null, 'If you can see this, React is working!'),
+                React.createElement('button', { 
+                    onClick: () => setCount(count + 1),
+                    style: { padding: '10px', margin: '10px' }
+                }, `Count: ${count}`)
+            );
+        }
+        
+        try {
+            console.log('Rendering test app...');
+            ReactDOM.render(React.createElement(TestApp), document.getElementById('root'));
+            console.log('Test app rendered successfully');
+        } catch (error) {
+            console.error('Render error:', error);
+            document.getElementById('root').innerHTML = `
+                <div style="padding: 20px; color: red;">
+                    <h2>Error occurred:</h2>
+                    <p>${error.message}</p>
+                    <pre>${error.stack}</pre>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html> 
