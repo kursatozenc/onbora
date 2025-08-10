@@ -175,28 +175,27 @@
                 <div id="step3" class="hidden bg-white rounded-3xl p-8 shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-6">Let's capture your culture</h2>
                     <p class="text-gray-600 mb-8">
-                        I'll have a quick conversation with you to understand what makes your company special. 
-                        This usually takes about 10 minutes.
+                        I'll analyze your documents first, then have a quick conversation to fill in any gaps. 
+                        This usually takes about 2-3 minutes.
                     </p>
                     
-                    <div id="interview" class="bg-gray-50 rounded-2xl p-6">
-                        <div id="interviewMessages" class="mb-4 space-y-4 max-h-96 overflow-y-auto">
-                            <div class="flex justify-start">
-                                <div class="max-w-lg">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span>🤖</span>
-                                        </div>
-                                        <span class="text-sm font-medium">AI Interviewer</span>
-                                    </div>
-                                    <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 mr-12">
-                                        <p class="text-gray-800">
-                                            Welcome! I'm your AI interviewer. I'll help capture what makes your company special. 
-                                            Let's start with something simple - how would you describe your company culture in a few words?
-                                        </p>
-                                    </div>
-                                </div>
+                    <!-- Document Analysis Step -->
+                    <div id="documentAnalysis" class="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6">
+                        <div class="text-center">
+                            <div class="text-3xl mb-4">🔍</div>
+                            <h3 class="text-lg font-semibold text-blue-800 mb-2">Analyzing Your Documents</h3>
+                            <p class="text-blue-700 mb-4">AI is reading through your company documents to understand your culture</p>
+                            <div class="flex items-center justify-center space-x-2">
+                                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div id="interview" class="bg-gray-50 rounded-2xl p-6 hidden">
+                        <div id="interviewMessages" class="mb-4 space-y-4 max-h-96 overflow-y-auto">
+                            <!-- Interview messages will appear here -->
                         </div>
                         
                         <div class="border-t border-gray-200 pt-4">
@@ -491,9 +490,175 @@
                 }
             }
             
+            if (step === 3) {
+                // Start document analysis when moving to step 3
+                startDocumentAnalysis();
+            }
+            
             document.getElementById(`step${currentStep}`).classList.add('hidden');
             document.getElementById(`step${step}`).classList.remove('hidden');
             currentStep = step;
+        }
+
+        async function startDocumentAnalysis() {
+            const documentAnalysis = document.getElementById('documentAnalysis');
+            const interview = document.getElementById('interview');
+            
+            // Show analysis in progress
+            documentAnalysis.classList.remove('hidden');
+            interview.classList.add('hidden');
+            
+            try {
+                // Analyze uploaded documents if any
+                let documentInsights = {};
+                if (uploadedFiles.length > 0) {
+                    documentInsights = await analyzeDocuments();
+                }
+                
+                // Store insights for the interview
+                window.documentInsights = documentInsights;
+                
+                // Show analysis complete
+                setTimeout(() => {
+                    documentAnalysis.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-3xl mb-4">✅</div>
+                            <h3 class="text-lg font-semibold text-green-800 mb-2">Documents Analyzed!</h3>
+                            <p class="text-green-700 mb-4">AI found ${Object.keys(documentInsights).length} key insights about your company</p>
+                            <button onclick="startSmartInterview()" class="bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700 transition">
+                                Start Smart Interview
+                            </button>
+                        </div>
+                    `;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Document analysis error:', error);
+                // Fallback to manual interview
+                startSmartInterview();
+            }
+        }
+
+        async function analyzeDocuments() {
+            try {
+                // Simulate document analysis with AI
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: `Analyze these company documents and extract key information about:
+                        1. Company values and culture
+                        2. Work policies and procedures
+                        3. Company structure and size
+                        4. Industry and business focus
+                        5. Employee benefits and perks
+                        6. Company traditions or unique aspects
+                        
+                        Document names: ${uploadedFiles.map(f => f.name).join(', ')}
+                        
+                        Return a JSON object with these categories and what you found. If information is missing or unclear, mark it as "needs_clarification".
+                        
+                        Example format:
+                        {
+                            "values": "Found: collaborative, innovative | Needs: specific examples",
+                            "policies": "Found: remote work policy | Needs: dress code, work hours",
+                            "structure": "Found: 50 employees | Needs: organizational chart",
+                            "industry": "Found: technology, SaaS | Needs: none",
+                            "benefits": "Found: health insurance | Needs: 401k, PTO details",
+                            "traditions": "Needs: company events, team building activities"
+                        }`,
+                        maxTokens: 500
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Try to parse JSON response, fallback to empty object if parsing fails
+                try {
+                    return JSON.parse(data.response);
+                } catch (parseError) {
+                    console.log('Could not parse AI response as JSON, using fallback');
+                    return {
+                        values: "Needs: company culture description",
+                        policies: "Needs: work policies and procedures",
+                        structure: "Needs: company structure details",
+                        industry: "Needs: industry and business focus",
+                        benefits: "Needs: employee benefits information",
+                        traditions: "Needs: company traditions and unique aspects"
+                    };
+                }
+                
+            } catch (error) {
+                console.error('Error analyzing documents:', error);
+                // Return default structure if AI analysis fails
+                return {
+                    values: "Needs: company culture description",
+                    policies: "Needs: work policies and procedures",
+                    structure: "Needs: company structure details",
+                    industry: "Needs: industry and business focus",
+                    benefits: "Needs: employee benefits information",
+                    traditions: "Needs: company traditions and unique aspects"
+                };
+            }
+        }
+
+        function startSmartInterview() {
+            const documentAnalysis = document.getElementById('documentAnalysis');
+            const interview = document.getElementById('interview');
+            
+            // Hide analysis, show interview
+            documentAnalysis.classList.add('hidden');
+            interview.classList.remove('hidden');
+            
+            // Initialize interview with smart first question
+            initializeSmartInterview();
+        }
+
+        function initializeSmartInterview() {
+            const documentInsights = window.documentInsights || {};
+            const interviewMessages = document.getElementById('interviewMessages');
+            
+            // Clear any existing messages
+            interviewMessages.innerHTML = '';
+            
+            // Find the most important gap to focus on
+            let priorityGap = null;
+            if (documentInsights.values && documentInsights.values.includes('Needs:')) {
+                priorityGap = 'values';
+            } else if (documentInsights.policies && documentInsights.policies.includes('Needs:')) {
+                priorityGap = 'policies';
+            } else if (documentInsights.traditions && documentInsights.traditions.includes('Needs:')) {
+                priorityGap = 'traditions';
+            }
+            
+            // Generate smart first question based on document analysis
+            let firstQuestion = "Welcome! I've analyzed your documents and have a good understanding of your company. ";
+            
+            if (priorityGap === 'values') {
+                firstQuestion += "I'd love to hear about your company culture and values. ";
+                firstQuestion += "What would you say makes your workplace special?";
+            } else if (priorityGap === 'policies') {
+                firstQuestion += "I found some of your work policies. ";
+                firstQuestion += "What's the most important thing new employees should know about how you work?";
+            } else if (priorityGap === 'traditions') {
+                firstQuestion += "I can see your company structure and policies. ";
+                firstQuestion += "What traditions or unique aspects make your company culture special?";
+            } else {
+                firstQuestion += "Let's start with something simple - how would you describe your company culture in a few words?";
+            }
+            
+            // Add AI greeting
+            addInterviewMessage(firstQuestion, false);
+            
+            // Reset interview state
+            interviewQuestionIndex = 0;
+            window.interviewAnswers = [];
         }
 
         function prevStep(step) {
@@ -622,15 +787,47 @@
                 const typingIndicator = document.getElementById('interviewTypingIndicator');
                 if (typingIndicator) typingIndicator.remove();
 
+                // Get document insights and previous answers
+                const documentInsights = window.documentInsights || {};
+                const previousAnswers = window.interviewAnswers || [];
+                
                 // Prepare context for the AI interviewer
                 const interviewContext = {
                     companyName: document.getElementById('companyName').value || 'Your Company',
                     companySize: document.getElementById('companySize').value || 'Not specified',
                     companyIndustry: document.getElementById('companyIndustry').value || 'Not specified',
-                    previousAnswers: window.interviewAnswers || [],
+                    previousAnswers: previousAnswers,
+                    documentInsights: documentInsights,
                     currentQuestion: interviewQuestionIndex + 1,
                     totalQuestions: 7
                 };
+
+                // Create smart prompt based on what we already know
+                let smartPrompt = `You are an AI interviewer helping to understand a company's culture for onboarding purposes. 
+                
+                Company: ${interviewContext.companyName}
+                Size: ${interviewContext.companySize}
+                Industry: ${interviewContext.companyIndustry}
+                
+                Previous answers: ${previousAnswers.join(', ')}
+                
+                Document insights already found: ${JSON.stringify(documentInsights)}
+                
+                Current question: ${interviewContext.currentQuestion} of 3
+                
+                The user just answered: "${message}"
+                
+                IMPORTANT: Based on the document insights and previous answers, ask the next intelligent question that:
+                1. DOES NOT ask about information already found in documents
+                2. Builds on what they've shared
+                3. Focuses on gaps or unclear areas
+                4. Feels natural and conversational
+                
+                You only have 3 questions total, so make each one count! Focus on the most important aspects that aren't already covered in documents.
+                
+                If this is the last question (question 3), thank them and say the interview is complete.
+                
+                Keep your response under 80 words and make it feel natural and engaging.`;
 
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
@@ -638,23 +835,7 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        prompt: `You are an AI interviewer helping to understand a company's culture for onboarding purposes. 
-                        
-                        Company: ${interviewContext.companyName}
-                        Size: ${interviewContext.companySize}
-                        Industry: ${interviewContext.companyIndustry}
-                        
-                        Previous answers: ${interviewContext.previousAnswers.join(', ')}
-                        
-                        Current question: ${interviewContext.currentQuestion} of ${interviewContext.totalQuestions}
-                        
-                        The user just answered: "${message}"
-                        
-                        Based on their answer, ask the next intelligent follow-up question to understand their company culture. 
-                        Make it conversational and build on what they've shared. 
-                        If this is the last question, thank them and say the interview is complete.
-                        
-                        Keep your response under 100 words and make it feel natural and engaging.`,
+                        prompt: smartPrompt,
                         maxTokens: 150
                     })
                 });
@@ -666,7 +847,7 @@
                 const data = await response.json();
                 
                 // Check if interview is complete
-                if (interviewQuestionIndex >= 6) { // 7 questions total (0-6)
+                if (interviewQuestionIndex >= 2) { // 3 questions total (0-2)
                     // Interview complete - show summary immediately
                     showInterviewSummary();
                 } else {
@@ -700,6 +881,10 @@
             const summary = document.getElementById('interviewSummary');
             summary.classList.remove('hidden');
             
+            // Get document insights
+            const documentInsights = window.documentInsights || {};
+            const hasDocuments = uploadedFiles.length > 0;
+            
             // Populate summary content
             const summaryContent = document.getElementById('summaryContent');
             summaryContent.innerHTML = `
@@ -713,18 +898,43 @@
                     <div class="bg-white p-4 rounded-lg">
                         <h4 class="font-semibold text-gray-800 mb-2">Documents</h4>
                         <p class="text-sm text-gray-600">${uploadedFiles.length} file(s) uploaded</p>
-                        ${uploadedFiles.length > 0 ? '<p class="text-xs text-green-600 mt-1">✓ Documents will be analyzed by AI agents</p>' : ''}
+                        ${hasDocuments ? '<p class="text-xs text-green-600 mt-1">✓ Documents analyzed by AI</p>' : ''}
                     </div>
                 </div>
+                
+                ${hasDocuments ? `
                 <div class="bg-white p-4 rounded-lg">
-                    <h4 class="font-semibold text-gray-800 mb-2">Culture Insights Captured</h4>
-                    <p class="text-sm text-gray-600">✓ Company culture description</p>
-                    <p class="text-sm text-gray-600">✓ Core values and principles</p>
-                    <p class="text-sm text-gray-600">✓ Work style preferences</p>
-                    <p class="text-sm text-gray-600">✓ First day priorities</p>
-                    <p class="text-sm text-gray-600">✓ First week milestones</p>
-                    <p class="text-sm text-gray-600">✓ Company traditions & perks</p>
+                    <h4 class="font-semibold text-gray-800 mb-2">📄 From Your Documents</h4>
+                    <div class="grid md:grid-cols-2 gap-3 text-sm">
+                        ${Object.entries(documentInsights).map(([key, value]) => {
+                            if (value.includes('Found:')) {
+                                return `<div class="text-green-700">✓ ${key.charAt(0).toUpperCase() + key.slice(1)}: ${value.split('Found:')[1].split('|')[0].trim()}</div>`;
+                            } else {
+                                return `<div class="text-gray-600">? ${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}</div>`;
+                            }
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="bg-white p-4 rounded-lg">
+                    <h4 class="font-semibold text-gray-800 mb-2">🎯 Interview Insights</h4>
+                    <p class="text-sm text-gray-600">✓ Company culture & values</p>
+                    <p class="text-sm text-gray-600">✓ Work style & priorities</p>
                     <p class="text-sm text-gray-600">✓ Key advice for new hires</p>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 mb-2">🧠 Smart Interview Benefits</h4>
+                    <p class="text-sm text-blue-700">
+                        ${hasDocuments ? 
+                            '• AI analyzed your documents first to avoid redundant questions<br>' +
+                            '• Interview focused only on gaps and unclear areas<br>' +
+                            '• More efficient and personalized experience' :
+                            '• Traditional interview approach to capture your culture<br>' +
+                            '• All insights captured through conversation'
+                        }
+                    </p>
                 </div>
             `;
         }
