@@ -1,0 +1,20 @@
+{
+  "name": "onbora",
+  "version": "1.0.0",
+  "description": "AI-powered onboarding platform for new employees",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.2.1"
+  },
+  "devDependencies": {
+    "vercel": "^32.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

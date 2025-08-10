@@ -1,108 +1,124 @@
-# 🚀 Onbora - AI-Powered Employee Onboarding
+# Onbora - AI-Powered Employee Onboarding
 
-> **"Belong from Day One"** - Transform how companies welcome new employees with intelligent AI agents.
+Onbora helps companies create personalized onboarding experiences that make every new employee feel welcomed, informed, and ready to contribute.
 
 ## ✨ Features
 
-### 🎯 **Smart Onboarding Flow**
-- **3-Step Setup**: Company info → Document upload → AI culture interview
-- **7 Progressive Questions**: Dynamic AI interview to understand company culture
-- **Real-time Chat Interface**: Engaging conversation instead of boring forms
+### 🎯 **Smart Company Setup**
+- **Company Profile**: Capture company name, size, and industry
+- **Document Upload**: Upload employee handbooks and policies
+- **AI Interview**: 10-minute conversation to understand your company culture
 
-### 🤖 **4 Specialized AI Agents**
-- **Maya** (Welcome Guide) - First day orientation
-- **Alex** (HR Assistant) - Benefits and policies
-- **Jordan** (Culture Guide) - Company culture and traditions  
-- **Sam** (Tech Setup) - IT and tools setup
+### 🤖 **AI Onboarding Agents**
+- **Maya** - Welcome Guide for first-day orientation
+- **Alex** - HR Assistant for policies and benefits
+- **Jordan** - Culture Guide for company values and traditions
+- **Sam** - Tech Setup Specialist for equipment and software
 
-### 🧠 **AI-Powered Intelligence**
-- **Google Gemini 1.5 Flash** integration
-- **Smart Mode Toggle**: Switch between AI and static responses
-- **Contextual Responses**: Based on company data and culture interview
-- **Progressive Checklists**: Day 1, Week 1, Month 1 milestones
+### 👀 **Preview & Test**
+- **Experience Preview**: Test your AI agents before inviting employees
+- **Full Demo**: Experience the complete onboarding flow
+- **Real-time AI**: Powered by Google Gemini for intelligent responses
 
-### 👥 **Manager & Employee Experience**
-- **Preview Mode**: Managers can test the experience before sharing
-- **Email Sharing System**: Personalized onboarding links
-- **Responsive Design**: Works on all devices
+### 📧 **Employee Invitation**
+- **Email Templates**: Pre-written welcome emails
+- **Direct Sending**: Send emails directly from the app
+- **Copy & Paste**: Easy email content copying
 
-## 🛠️ Tech Stack
+## 🚀 Getting Started
 
-- **Frontend**: React 18, Tailwind CSS
-- **AI Integration**: Google Gemini 1.5 Flash API
-- **Deployment**: Vercel
-- **Architecture**: Single HTML file with embedded React
+### 1. **Setup Your Company**
+- Enter company information
+- Upload relevant documents
+- Complete the AI culture interview
 
-## 🚀 Quick Start
+### 2. **Preview the Experience**
+- Test your AI agents
+- Review company profile
+- Customize if needed
 
-### **For Managers**
-1. Visit the app and click "Get Started"
-2. Enter company information
-3. Complete the AI culture interview
-4. Preview the employee experience
-5. Share with new employees
+### 3. **Invite New Employees**
+- Send personalized welcome emails
+- Share onboarding access
+- Monitor progress
 
-### **For Employees**
-1. Receive onboarding link
-2. Chat with AI agents
-3. Complete checklists
-4. Get personalized guidance
+## 🛠️ Technical Details
 
-## 🔧 Development
+### **Frontend**
+- React-based single-page application
+- Tailwind CSS for styling
+- Responsive design for all devices
 
-### **Local Development**
+### **Backend**
+- Vercel serverless functions
+- Google Gemini AI integration
+- Secure API key management
+
+### **AI Integration**
+- Real-time conversation with AI agents
+- Company culture personalization
+- Fallback responses when AI is unavailable
+
+## 🔧 Setup
+
+### **Prerequisites**
+- Node.js 18+ 
+- Vercel account
+- Google Gemini API key
+
+### **Installation**
 ```bash
 # Clone the repository
-git clone https://github.com/kursatozenc/onbora.git
-cd onbora
+git clone <your-repo-url>
+cd Onbora
 
-# Open index.html in your browser
-open index.html
+# Install dependencies
+npm install
+
+# Set environment variables
+echo "GEMINI_API_KEY=your_api_key_here" > .env.local
+
+# Run locally
+npm run dev
+
+# Deploy to Vercel
+npm run deploy
 ```
 
 ### **Environment Variables**
-Create a `.env.local` file:
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-```
+- `GEMINI_API_KEY`: Your Google Gemini API key
 
-## 📊 Current Status
+## 📱 Usage Flow
 
-✅ **Working prototype ready for deployment**  
-✅ **All core features functional**  
-✅ **AI integration tested**  
-✅ **Responsive design implemented**  
-✅ **Ready for manager feedback**
+1. **Landing Page** → Learn about Onbora
+2. **Setup** → Configure your company (3 steps)
+3. **Preview** → Test your AI agents
+4. **Employee Experience** → Full onboarding demo
+5. **Invite** → Send welcome emails to new hires
 
-## 🎯 Next Steps
+## 🔒 Security
 
-- [ ] Deploy to Vercel
-- [ ] Add backend for API key protection
-- [ ] Implement real file processing
-- [ ] Add database for persistence
-- [ ] User authentication system
-- [ ] Analytics dashboard
+- API keys stored in environment variables
+- Secure API routes for AI communication
+- No sensitive data exposed in frontend
 
-## 📈 Success Metrics
+## 🚀 Deployment
 
-- Setup completion rate
-- Interview completion rate
-- Average questions asked to agents
-- Checklist completion rates
-- Smart Mode usage percentage
-- Manager → Employee conversion rate
+The app is configured for Vercel deployment with:
+- Static hosting for the main app
+- Serverless functions for AI endpoints
+- Automatic API routing
 
 ## 🤝 Contributing
 
-This is a prototype project. Feel free to:
-- Report bugs
-- Suggest features
-- Fork and experiment
-- Provide feedback
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## 📄 License
 
-MIT License - feel free to use this for your own projects!
+This project is licensed under the MIT License.
 
 ---
 

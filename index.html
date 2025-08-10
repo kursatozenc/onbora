@@ -340,6 +340,8 @@
                 setMessages(prev => [...prev, thinkingMessage]);
                 
                 try {
+                    console.log('Sending message to AI agent:', currentAgent);
+                    
                     // Use secure API route for AI agent responses
                     const response = await fetch('/api/ai-chat', {
                         method: 'POST',
@@ -352,11 +354,17 @@
                         })
                     });
                     
+                    console.log('AI response status:', response.status);
+                    
                     if (!response.ok) {
-                        throw new Error('AI service unavailable');
+                        const errorData = await response.json();
+                        console.error('AI API error:', errorData);
+                        throw new Error(`AI service error: ${response.status}`);
                     }
                     
                     const data = await response.json();
+                    console.log('AI response data:', data);
+                    
                     const aiResponse = data.response;
                     
                     // Remove thinking message and add AI response
@@ -854,15 +862,228 @@
                                                 Back
                                             </button>
                                             <button 
-                                                onClick={() => setCurrentView('employee')}
+                                                onClick={() => setCurrentView('preview')}
                                                 disabled={!showSummary}
                                                 className="flex-1 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                                             >
-                                                {!showSummary ? 'Complete Interview First' : 'Complete Setup'}
+                                                {!showSummary ? 'Complete Interview First' : 'Preview the Experience'}
                                             </button>
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (currentView === 'preview') {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        <nav className="bg-white border-b border-gray-200 px-8 py-4">
+                            <div className="flex justify-between items-center">
+                                <div 
+                                    className="flex items-center space-x-2 cursor-pointer"
+                                    onClick={() => setCurrentView('landing')}
+                                >
+                                    <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                                        <span className="text-white font-bold text-sm">O</span>
+                                    </div>
+                                    <span className="text-xl font-bold">Onbora</span>
+                                </div>
+                                <button 
+                                    onClick={() => setCurrentView('landing')}
+                                    className="text-gray-600 hover:text-black transition text-2xl"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </nav>
+
+                        <div className="max-w-6xl mx-auto px-8 py-12">
+                            <div className="text-center mb-12">
+                                <h1 className="text-4xl font-bold mb-4">🎉 Your AI Onboarding Team is Ready!</h1>
+                                <p className="text-xl text-gray-600">
+                                    This is what your new employees will experience. Test it out and then invite them!
+                                </p>
+                            </div>
+
+                            {/* Preview Section */}
+                            <div className="grid lg:grid-cols-2 gap-8 mb-12">
+                                {/* Agent Preview */}
+                                <div className="bg-white rounded-3xl p-8 shadow-sm">
+                                    <h2 className="text-2xl font-bold mb-6">🤖 Preview Your AI Agents</h2>
+                                    <p className="text-gray-600 mb-6">
+                                        Test how your AI onboarding team will interact with new employees. Each agent has been personalized based on your company culture.
+                                    </p>
+                                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-green-600">✓</span>
+                                            <span className="text-sm text-green-800">AI Service Ready</span>
+                                        </div>
+                                        <p className="text-xs text-green-700 mt-1">Your AI agents are powered by Google Gemini and ready to help new employees.</p>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {Object.entries(agents).map(([key, agent]) => (
+                                            <div key={key} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                                                <div className="text-3xl">{agent.avatar}</div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold">{agent.name}</h3>
+                                                    <p className="text-sm text-gray-600">{agent.role}</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setCurrentView('employee')}
+                                                    className="text-sm bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition"
+                                                >
+                                                    Test
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Company Summary */}
+                                <div className="bg-white rounded-3xl p-8 shadow-sm">
+                                    <h2 className="text-2xl font-bold mb-6">🏢 Your Company Profile</h2>
+                                    <p className="text-gray-600 mb-6">
+                                        Based on our conversation, here's what we've captured about your company culture.
+                                    </p>
+                                    <div className="space-y-4 text-sm">
+                                        <div>
+                                            <span className="font-semibold text-gray-700">Company:</span>
+                                            <p className="text-gray-600">{companyData.name || 'Your Company'}</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold text-gray-700">Size:</span>
+                                            <p className="text-gray-600">{companyData.size || 'Not specified'}</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold text-gray-700">Industry:</span>
+                                            <p className="text-gray-600">{companyData.industry || 'Not specified'}</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold text-gray-700">Documents:</span>
+                                            <p className="text-gray-600">{companyData.documents.length || 0} uploaded</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold text-gray-700">Culture Insights:</span>
+                                            <p className="text-gray-600 mt-1">
+                                                {companyData.culture.question_1 ? '✓ Core values captured' : '⏳ Pending'}<br/>
+                                                {companyData.culture.question_2 ? '✓ Work style defined' : '⏳ Pending'}<br/>
+                                                {companyData.culture.question_3 ? '✓ First day goals set' : '⏳ Pending'}<br/>
+                                                {companyData.culture.question_4 ? '✓ Week 1 milestones' : '⏳ Pending'}<br/>
+                                                {companyData.culture.question_5 ? '✓ Unique aspects noted' : '⏳ Pending'}<br/>
+                                                {companyData.culture.question_6 ? '✓ Advice captured' : '⏳ Pending'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Invitation Section */}
+                            <div className="bg-white rounded-3xl p-8 shadow-sm">
+                                <h2 className="text-2xl font-bold mb-6">📧 Invite New Employees</h2>
+                                <p className="text-gray-600 mb-6">
+                                    Once you're satisfied with the preview, invite your new employees to experience their personalized onboarding journey.
+                                </p>
+                                <div className="grid lg:grid-cols-2 gap-8">
+                                    {/* Email Template */}
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4">Email Template</h3>
+                                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                                            <div className="text-sm text-gray-600 mb-2">Subject: Welcome to {companyData.name || 'Our Team'}! 🎉</div>
+                                            <div className="text-sm text-gray-800 leading-relaxed">
+                                                Hi [Employee Name],<br><br>
+                                                Welcome to {companyData.name || 'our team'}! We're excited to have you join us.<br><br>
+                                                To get you started, we've created a personalized onboarding experience just for you. You'll have access to AI agents who can help with everything from setting up your workspace to understanding our company culture.<br><br>
+                                                <strong>Your Onboarding Experience:</strong><br>
+                                                • Maya - Your welcome guide for day one<br>
+                                                • Alex - HR assistant for policies and benefits<br>
+                                                • Jordan - Culture guide for team dynamics<br>
+                                                • Sam - Tech setup specialist<br><br>
+                                                Click the link below to begin your onboarding journey:<br>
+                                                <a href="#" className="text-blue-600 underline">[Onboarding Link]</a><br><br>
+                                                We're here to make your transition smooth and enjoyable. Welcome aboard!<br><br>
+                                                Best regards,<br>
+                                                [Your Name]<br>
+                                                {companyData.name || 'Your Company'}
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                const emailContent = document.querySelector('.bg-gray-50').textContent;
+                                                navigator.clipboard.writeText(emailContent);
+                                                // Show feedback
+                                                const button = event.target;
+                                                const originalText = button.innerHTML;
+                                                button.innerHTML = '<span>✓</span><span>Copied!</span>';
+                                                button.className = 'w-full bg-green-600 text-white py-3 rounded-xl transition flex items-center justify-center space-x-2';
+                                                setTimeout(() => {
+                                                    button.innerHTML = originalText;
+                                                    button.className = 'w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-700 transition flex items-center justify-center space-x-2';
+                                                }, 2000);
+                                            }}
+                                            className="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-700 transition flex items-center justify-center space-x-2"
+                                        >
+                                            <span>📋</span>
+                                            <span>Copy Email Content</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Direct Email */}
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4">Send Direct Email</h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Employee Name</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                                    placeholder="Enter employee name"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">Employee Email</label>
+                                                <input
+                                                    type="email"
+                                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-black"
+                                                    placeholder="employee@company.com"
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={() => {
+                                                    const name = document.querySelector('input[placeholder="Enter employee name"]').value;
+                                                    const email = document.querySelector('input[placeholder="employee@company.com"]').value;
+                                                    if (name && email) {
+                                                        const subject = `Welcome to ${companyData.name || 'Our Team'}! 🎉`;
+                                                        const body = `Hi ${name},\n\nWelcome to ${companyData.name || 'our team'}! We're excited to have you join us.\n\nTo get you started, we've created a personalized onboarding experience just for you. You'll have access to AI agents who can help with everything from setting up your workspace to understanding our company culture.\n\nYour Onboarding Experience:\n• Maya - Your welcome guide for day one\n• Alex - HR assistant for policies and benefits\n• Jordan - Culture guide for team dynamics\n• Sam - Tech setup specialist\n\nClick the link below to begin your onboarding journey:\n[Onboarding Link]\n\nWe're here to make your transition smooth and enjoyable. Welcome aboard!\n\nBest regards,\n[Your Name]\n${companyData.name || 'Your Company'}`;
+                                                        window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+                                                    }
+                                                }}
+                                                className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition flex items-center justify-center space-x-2"
+                                            >
+                                                <span>📧</span>
+                                                <span>Send Welcome Email</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex space-x-4 mt-8">
+                                <button 
+                                    onClick={() => setCurrentView('setup')}
+                                    className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl hover:bg-gray-50 transition"
+                                >
+                                    ← Back to Setup
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('employee')}
+                                    className="flex-1 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition"
+                                >
+                                    Test Full Experience →
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -960,6 +1181,12 @@
                                         <div className="flex items-center space-x-1 ml-3">
                                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                             <span className="text-xs text-gray-500">Online</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                            <span className="text-xs text-gray-500">AI Ready</span>
                                         </div>
                                     </div>
                                 </div>

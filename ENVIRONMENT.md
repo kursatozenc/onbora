@@ -1,40 +1,42 @@
-# Environment Variables Setup
+# Onbora Environment Setup
 
-## Required for Vercel Deployment
+## Required Environment Variables
 
-### 1. GEMINI_API_KEY
-- **Purpose**: Your Google Gemini API key for AI functionality
-- **How to get**: 
-  1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-  2. Create a new API key
-  3. Copy the key (starts with "AIza...")
+### Gemini API Key
+To enable AI-powered onboarding agents, you need to set up a Gemini API key:
 
-### 2. Vercel Configuration
-1. Go to your Vercel project dashboard
-2. Click on "Settings" → "Environment Variables"
-3. Add a new variable:
-   - **Name**: `GEMINI_API_KEY`
-   - **Value**: Your actual API key
-   - **Environment**: Production (and Preview if you want)
+1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create a new API key
+3. Set the environment variable: `GEMINI_API_KEY`
 
 ## Local Development
 
-Create a `.env.local` file in your project root:
-```bash
-GEMINI_API_KEY=your_actual_api_key_here
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Security Notes
+2. Set up environment variables in a `.env.local` file:
+   ```
+   GEMINI_API_KEY=your_api_key_here
+   ```
 
-✅ **DO**: Store API keys in Vercel environment variables
-✅ **DO**: Use the secure API routes we created
-❌ **DON'T**: Commit API keys to your repository
-❌ **DON'T**: Expose API keys in frontend code
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-## API Routes Created
+## Deployment
 
-- `/api/gemini` - General Gemini API calls
-- `/api/generate-ritual` - Team ritual generation
-- `/api/ai-chat` - AI agent conversations
+The app is configured for Vercel deployment with:
+- Static hosting for the main app
+- Serverless functions for AI API endpoints
+- Proper routing configuration
 
-All routes now securely use your environment variables instead of exposing them in the frontend. 
+## Features
+
+- **AI Interviewer**: Captures company culture through conversation
+- **AI Onboarding Agents**: Personalized support for new employees
+- **Preview Mode**: Test the experience before inviting employees
+- **Email Integration**: Send personalized welcome emails
+- **Progress Tracking**: Checklists for onboarding milestones 
