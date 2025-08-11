@@ -17,45 +17,56 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: 'AI service not configured' });
     }
 
-    // Define agent personalities and contexts
+    // Define enhanced agent personalities with specializations
     const agentPrompts = {
       maya: {
         name: "Maya",
         role: "Welcome Guide",
-        context: "You are Maya, a warm and welcoming onboarding specialist. You help new employees feel comfortable and excited about their first day. Be encouraging, informative, and make them feel like they belong."
+        context: "You are Maya, a warm and welcoming onboarding specialist who knows this company inside and out. You help new employees feel comfortable and excited about their first day. You know the office layout, first-day procedures, company traditions, and cultural nuances.",
+        focus: "first-day experience, office orientation, company traditions, making people feel welcome"
       },
       alex: {
-        name: "Alex",
-        role: "HR Assistant", 
-        context: "You are Alex, a knowledgeable HR professional. You help with benefits, policies, paperwork, and company procedures. Be clear, professional, and helpful with administrative questions."
+        name: "Alex", 
+        role: "HR Assistant",
+        context: "You are Alex, a knowledgeable HR professional who is an expert on this company's specific policies, benefits, and procedures. You have deep knowledge of the employee handbook, benefits packages, and administrative processes.",
+        focus: "benefits, policies, procedures, HR questions, administrative tasks"
       },
       jordan: {
         name: "Jordan",
-        role: "Culture Guide",
-        context: "You are Jordan, a company culture expert. You help new employees understand company values, traditions, unwritten rules, and how to fit in. Be friendly, insightful, and share cultural context."
+        role: "Culture Guide", 
+        context: "You are Jordan, a company culture expert who understands this company's unique values, traditions, unwritten rules, and social dynamics. You help new employees understand how to thrive in this specific culture.",
+        focus: "company values, culture, team dynamics, unwritten rules, success tips"
       },
       sam: {
         name: "Sam",
         role: "Tech Setup Specialist",
-        context: "You are Sam, an IT and technology expert. You help with computer setup, software access, tools, and technical questions. Be patient, clear, and step-by-step in your explanations."
+        context: "You are Sam, an IT and technology expert who knows this company's specific tech stack, tools, and setup procedures. You help with technical onboarding and system access.",
+        focus: "technical setup, software access, IT systems, troubleshooting"
       }
     };
 
     const agent = agentPrompts[agentType] || agentPrompts.maya;
     
+    // Build comprehensive company knowledge base
+    const companyKnowledge = buildCompanyKnowledge(companyContext);
+    
     const systemPrompt = `
       ${agent.context}
       
-      Company Context: ${companyContext || 'A welcoming company focused on employee success'}
+      COMPANY KNOWLEDGE BASE:
+      ${companyKnowledge}
       
-      Guidelines:
-      - Keep responses concise but helpful (2-4 sentences)
-      - Be warm and encouraging
-      - Provide actionable advice when possible
-      - If you don't know something, suggest who to ask
-      - Always maintain your agent personality
+      YOUR EXPERTISE: ${agent.focus}
       
-      Respond as ${agent.name}, the ${agent.role}.
+      CONVERSATION GUIDELINES:
+      - Answer based on actual company information when available
+      - Be specific and reference company details
+      - Keep responses helpful but concise (2-4 sentences)
+      - If you don't have specific info, acknowledge it and suggest alternatives
+      - Maintain your warm, professional personality as ${agent.name}
+      - Focus on ${agent.focus} while being helpful with other topics
+      
+      Respond as ${agent.name}, the ${agent.role} for ${companyContext?.name || 'this company'}.
     `;
 
     const geminiRequest = {
@@ -72,7 +83,7 @@ export default async function handler(req, res) {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 256,
+        maxOutputTokens: isSmartMode ? 400 : 256,
       }
     };
 
@@ -135,6 +146,46 @@ export default async function handler(req, res) {
       agent: 'AI Assistant'
     });
   }
+}
+
+// Build comprehensive company knowledge base from context
+function buildCompanyKnowledge(context) {
+  if (!context) return "No company information available.";
+  
+  let knowledge = `Company: ${context.name || 'Unknown'}
+Size: ${context.size || 'Unknown'}
+Industry: ${context.industry || 'Unknown'}`;
+
+  // Add document insights if available
+  if (context.insights && Object.keys(context.insights).length > 0) {
+    knowledge += `\n\nDOCUMENT ANALYSIS INSIGHTS:`;
+    Object.entries(context.insights).forEach(([key, value]) => {
+      if (value && !value.includes('Needs clarification')) {
+        knowledge += `\n- ${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`;
+      }
+    });
+  }
+
+  // Add interview responses if available
+  if (context.culture && context.culture.length > 0) {
+    knowledge += `\n\nINTERVIEW INSIGHTS:`;
+    context.culture.forEach((answer, index) => {
+      knowledge += `\n- Response ${index + 1}: ${answer}`;
+    });
+  }
+
+  // Add available documents
+  if (context.documents && context.documents.length > 0) {
+    knowledge += `\n\nAVAILABLE DOCUMENTS: ${context.documents.join(', ')}`;
+  }
+
+  // Add key document content snippets (truncated for context window)
+  if (context.fullDocumentContent && context.fullDocumentContent !== 'No documents uploaded') {
+    const truncatedContent = context.fullDocumentContent.substring(0, 2000);
+    knowledge += `\n\nKEY DOCUMENT CONTENT:\n${truncatedContent}${context.fullDocumentContent.length > 2000 ? '...' : ''}`;
+  }
+
+  return knowledge;
 }
 
 // Fallback static responses when AI is unavailable
