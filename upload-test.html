@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .upload-area {
+            border: 3px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            background: #f9f9f9;
+        }
+        .upload-area:hover { background: #f0f0f0; }
+        .file-list { margin-top: 20px; }
+        .file-item { 
+            padding: 10px; 
+            background: #e9e9e9; 
+            margin: 5px 0; 
+            border-radius: 5px; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple File Upload Test</h1>
+    
+    <div id="uploadArea" class="upload-area">
+        <h3>Click here or drag files to upload</h3>
+        <p>This will test if basic file upload works</p>
+        <input type="file" id="fileInput" multiple style="display: none;">
+    </div>
+    
+    <div id="fileList" class="file-list"></div>
+    
+    <div id="console" style="margin-top: 20px; padding: 10px; background: #000; color: #0f0; font-family: monospace; height: 200px; overflow-y: scroll;"></div>
+
+    <script>
+        // Prevent default drag behaviors
+        document.addEventListener('dragover', e => e.preventDefault());
+        document.addEventListener('drop', e => e.preventDefault());
+        
+        function log(message) {
+            const console = document.getElementById('console');
+            console.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            console.scrollTop = console.scrollHeight;
+            console.log(message);
+        }
+        
+        let uploadedFiles = [];
+        
+        function handleFiles(files) {
+            log(`handleFiles called with ${files.length} files`);
+            
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            uploadedFiles = [];
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                log(`Processing: ${file.name} (${file.type}, ${file.size} bytes)`);
+                
+                uploadedFiles.push(file);
+                
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                fileDiv.innerHTML = `
+                    <strong>${file.name}</strong><br>
+                    Type: ${file.type || 'unknown'}<br>
+                    Size: ${file.size} bytes
+                `;
+                fileList.appendChild(fileDiv);
+            }
+            
+            log(`Total files processed: ${uploadedFiles.length}`);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Page loaded, setting up handlers');
+            
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!uploadArea) {
+                log('ERROR: Upload area not found!');
+                return;
+            }
+            
+            if (!fileInput) {
+                log('ERROR: File input not found!');
+                return;
+            }
+            
+            // Click handler
+            uploadArea.addEventListener('click', function() {
+                log('Upload area clicked');
+                fileInput.click();
+            });
+            
+            // File input change
+            fileInput.addEventListener('change', function() {
+                log('File input changed');
+                handleFiles(this.files);
+            });
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.style.background = '#e0e0e0';
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.style.background = '#f9f9f9';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.style.background = '#f9f9f9';
+                
+                log('Files dropped on upload area');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+            
+            log('All handlers set up successfully');
+        });
+    </script>
+</body>
+</html>
