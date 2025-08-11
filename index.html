@@ -142,7 +142,7 @@
                         <p class="text-gray-600 mb-4">Drag and drop files here, or click to browse</p>
                         <p class="text-sm text-blue-600 mb-4">Documents will be analyzed by AI agents to provide personalized responses</p>
                         <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" onchange="handleFileUpload(event)">
-                        <button onclick="document.getElementById('fileInput').click()" class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition">
+                        <button onclick="testFileUpload()" class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition">
                             Choose Files
                         </button>
                         
@@ -692,12 +692,30 @@
         }
 
         function handleFileUpload(event) {
+            console.log('handleFileUpload called with event:', event);
+            console.log('Event target files:', event.target.files);
+            
             const files = event.target.files;
-            if (!files || files.length === 0) return;
+            if (!files || files.length === 0) {
+                console.log('No files selected');
+                return;
+            }
+            
+            console.log('Files selected:', files.length);
             
             const fileList = document.getElementById('fileList');
             const docProcessingStatus = document.getElementById('docProcessingStatus');
             const uploadStatus = document.getElementById('uploadStatus');
+            
+            if (!fileList) {
+                console.error('fileList element not found!');
+                return;
+            }
+            
+            if (!docProcessingStatus) {
+                console.error('docProcessingStatus element not found!');
+                return;
+            }
             
             // Clear previous file list
             fileList.innerHTML = '';
@@ -708,6 +726,8 @@
             
             // Process each file
             for (let file of files) {
+                console.log('Processing file:', file.name, file.size, file.type);
+                
                 // Add to global array
                 uploadedFiles.push(file);
                 
@@ -725,8 +745,11 @@
                 fileList.appendChild(fileItem);
             }
             
+            console.log('Total uploaded files:', uploadedFiles.length);
+            
             // Simulate document processing completion
             setTimeout(() => {
+                console.log('Processing complete, updating UI...');
                 docProcessingStatus.classList.add('hidden');
                 
                 // Update file items to show completion
@@ -1158,6 +1181,11 @@
                     </div>
                 </div>
             `;
+        }
+
+        function testFileUpload() {
+            document.getElementById('fileInput').click();
+            console.log('File input clicked!');
         }
 
         // Initialize the app
