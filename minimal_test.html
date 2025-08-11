@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Upload Test</title>
+</head>
+<body>
+    <h1>MINIMAL FILE UPLOAD TEST</h1>
+    
+    <h2>Test 1: Does basic file input work?</h2>
+    <input type="file" id="test1" onchange="console.log('FILE SELECTED:', this.files); alert('File selected: ' + this.files[0]?.name);">
+    
+    <h2>Test 2: Does click handler work?</h2>
+    <button onclick="console.log('BUTTON CLICKED'); alert('Button works!');">Click Me</button>
+    
+    <h2>Test 3: Does function call work?</h2>
+    <button onclick="testFunction();">Call Function</button>
+    
+    <h2>Test 4: Does inline file handler work?</h2>
+    <input type="file" onchange="testFunction(this.files);">
+    
+    <script>
+        console.log('MINIMAL TEST PAGE LOADED');
+        
+        function testFunction(files) {
+            console.log('TEST FUNCTION CALLED');
+            if (files) {
+                console.log('FILES PARAMETER:', files);
+                alert('Function called with ' + files.length + ' files');
+            } else {
+                alert('Function called without files');
+            }
+        }
+    </script>
+</body>
+</html> 
