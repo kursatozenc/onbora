@@ -135,34 +135,18 @@
                 <div id="step2" class="hidden bg-white rounded-3xl p-8 shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-6">Company Documents</h2>
                     <p class="text-gray-600 mb-6">
-                        Upload your employee handbook, policies, or any other documents that new hires should know about.
+                        Upload your employee handbook, policies, or any other documents that new hires should know about. (e.g., .txt, .md, .pdf)
                     </p>
-                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                    
+                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition hover:bg-gray-50">
                         <div class="text-4xl mb-4">📄</div>
-                        <p class="text-gray-600 mb-4">Drag and drop files here, or click to browse</p>
-                        <p class="text-sm text-blue-600 mb-4">Documents will be analyzed by AI agents to provide personalized responses</p>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" onchange="handleFileUpload(this.files)">
-                        <button onclick="testFileUpload()" class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition">
-                            Choose Files
-                        </button>
-                        
-                        <!-- Upload Status -->
-                        <div id="uploadStatus" class="mt-4 hidden">
-                            <div class="flex items-center justify-center space-x-2 text-green-600">
-                                <span>✓</span>
-                                <span class="text-sm">Files uploaded successfully!</span>
-                            </div>
-                        </div>
+                        <p class="text-gray-600 mb-2">Drag & drop files here, or click to browse</p>
+                        <p class="text-sm text-gray-500">AI will analyze text-based files to fuel the interview.</p>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.md" class="hidden">
                     </div>
+
                     <div id="fileList" class="mt-4 space-y-2"></div>
                     
-                    <!-- Document Processing Status -->
-                    <div id="docProcessingStatus" class="hidden mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                            <span class="text-sm text-blue-800">Processing documents for AI analysis...</span>
-                        </div>
-                    </div>
                     <div class="mt-6 flex justify-between">
                         <button 
                             onclick="prevStep(1)"
@@ -428,13 +412,12 @@
     </div>
 
     <script>
-        // Global variables
+        // Global state
         let currentStep = 1;
-        let uploadedFiles = [];
         let uploadedFileContents = [];
         let currentAgent = 'maya';
         let interviewQuestionIndex = 0;
-        
+
         const interviewQuestions = [
             "That's great! Now, what are the core values that drive your team? What principles guide how you work together?",
             "Perfect! What should new employees know about your work style? Are you more collaborative or independent? Fast-paced or methodical?",
@@ -492,7 +475,6 @@
 
         function nextStep(step) {
             if (step === 2) {
-                // Validate step 1
                 const companyName = document.getElementById('companyName').value;
                 if (!companyName.trim()) {
                     alert('Please enter your company name');
@@ -501,7 +483,6 @@
             }
             
             if (step === 3) {
-                // Start document analysis when moving to step 3
                 startDocumentAnalysis();
             }
             
@@ -515,7 +496,7 @@
             const interview = document.getElementById('interview');
             
             console.log('Starting document analysis...');
-            console.log('Uploaded files:', uploadedFiles.map(f => f.name));
+            console.log('Uploaded files:', uploadedFileContents.map(f => f.name));
             
             // Show analysis in progress
             documentAnalysis.classList.remove('hidden');
@@ -524,7 +505,7 @@
             try {
                 // Analyze uploaded documents if any
                 let documentInsights = {};
-                if (uploadedFiles.length > 0) {
+                if (uploadedFileContents.length > 0) {
                     console.log('Analyzing documents with AI...');
                     documentInsights = await analyzeDocuments();
                     console.log('Document insights:', documentInsights);
@@ -694,150 +675,55 @@
         }
 
         function handleFileUpload(files) {
-            console.log('handleFileUpload called with files:', files);
-            
-            if (!files || files.length === 0) {
-                console.log('No files selected');
-                return;
-            }
-            
-            console.log('Files selected:', files.length);
-            
+            console.log('handleFileUpload triggered with', files.length, 'files.');
             const fileList = document.getElementById('fileList');
-            const docProcessingStatus = document.getElementById('docProcessingStatus');
-            const uploadStatus = document.getElementById('uploadStatus');
             
-            if (!fileList) {
-                console.error('fileList element not found!');
-                return;
-            }
-            
-            if (!docProcessingStatus) {
-                console.error('docProcessingStatus element not found!');
-                return;
-            }
-            
-            // Clear previous file list
+            // It's safer to overwrite than to try and sync
+            uploadedFileContents = []; 
             fileList.innerHTML = '';
-            uploadedFileContents = [];
-            
-            // Show processing status
-            docProcessingStatus.classList.remove('hidden');
-            uploadStatus.classList.add('hidden'); // Hide success status
-            
-            // Process each file
-            const readPromises = [];
-            for (let file of files) {
-                console.log('Processing file:', file.name, file.size, file.type);
-                
-                // Add to global array
-                uploadedFiles.push(file);
-                
-                // Create file item
+
+            if (!files || files.length === 0) {
+                console.log('No files to process.');
+                return;
+            }
+
+            for (const file of files) {
                 const fileItem = document.createElement('div');
-                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2';
+                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
                 fileItem.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="text-gray-600">📄</span>
-                        <span class="text-sm text-gray-700">${file.name}</span>
-                        <span class="text-xs text-blue-600">Processing...</span>
+                    <div class="flex items-center space-x-2 overflow-hidden">
+                        <span class="text-xl">📄</span>
+                        <span class="text-sm text-gray-700 truncate">${file.name}</span>
                     </div>
-                    <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">×</button>
+                    <span class="file-status text-xs text-blue-600 ml-2">Processing...</span>
                 `;
                 fileList.appendChild(fileItem);
 
-                // Read text content for supported types
                 const isReadableText = file.type.startsWith('text/') || /\.(txt|md)$/i.test(file.name);
                 if (isReadableText) {
-                    const p = new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const content = String(reader.result || '').slice(0, 8000);
-                            uploadedFileContents.push({ name: file.name, type: file.type || 'text/plain', content });
-                            resolve();
-                        };
-                        reader.onerror = () => {
-                            console.warn('Failed to read file content:', file.name);
-                            resolve();
-                        };
-                        reader.readAsText(file);
-                    });
-                    readPromises.push(p);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const content = String(e.target.result || '').slice(0, 8000);
+                        uploadedFileContents.push({ name: file.name, type: file.type, content: content });
+                        fileItem.querySelector('.file-status').textContent = '✓ Ready';
+                        fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-green-600');
+                        console.log('Successfully read:', file.name);
+                    };
+                    reader.onerror = () => {
+                        console.error('Failed to read file:', file.name);
+                        fileItem.querySelector('.file-status').textContent = '✗ Error';
+                        fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-red-600');
+                    };
+                    reader.readAsText(file);
                 } else {
-                    // Store metadata only for non-text files
-                    uploadedFileContents.push({ name: file.name, type: file.type || 'application/octet-stream', content: '' });
+                    uploadedFileContents.push({ name: file.name, type: file.type, content: `[File type (${file.type}) not readable in browser]` });
+                    fileItem.querySelector('.file-status').textContent = '✓ Added';
+                    fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-gray-500');
+                    console.log('Added non-readable file:', file.name);
                 }
             }
             
-            console.log('Total uploaded files:', uploadedFiles.length);
-            
-            // After reading completes, update UI
-            Promise.all(readPromises).then(() => {
-                console.log('Processing complete, updating UI...');
-                docProcessingStatus.classList.add('hidden');
-                
-                // Update file items to show completion
-                const fileItems = fileList.querySelectorAll('.flex');
-                fileItems.forEach(item => {
-                    const statusSpan = item.querySelector('.text-blue-600');
-                    if (statusSpan) {
-                        statusSpan.textContent = '✓ Ready for AI';
-                        statusSpan.className = 'text-xs text-green-600';
-                    }
-                });
-                
-                // Show success message
-                const successDiv = document.createElement('div');
-                successDiv.className = 'mt-3 p-3 bg-green-50 border border-green-200 rounded-lg';
-                successDiv.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="text-green-600">✓</span>
-                        <span class="text-sm text-green-800">${uploadedFiles.length} document(s) processed and ready for AI analysis</span>
-                    </div>
-                `;
-                fileList.appendChild(successDiv);
-                uploadStatus.classList.remove('hidden'); // Show success status
-                
-                // Reset file input so selecting the same file again triggers change
-                const hiddenInput = document.getElementById('fileInput');
-                if (hiddenInput) hiddenInput.value = '';
-                
-                // Remove success message after 5 seconds
-                setTimeout(() => {
-                    if (successDiv.parentNode) {
-                        successDiv.remove();
-                    }
-                }, 5000);
-                
-                console.log('Files uploaded:', uploadedFiles.map(f => f.name));
-                console.log('Uploaded file contents (summaries):', uploadedFileContents.map(f => ({ name: f.name, type: f.type, contentPreview: f.content ? f.content.slice(0, 120) : '' })));
-            });
-        }
-
-        function removeFile(fileName) {
-            // Remove from global array
-            uploadedFiles = uploadedFiles.filter(f => f.name !== fileName);
-            
-            // Refresh file list display
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '';
-            
-            // Re-display remaining files
-            uploadedFiles.forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2';
-                fileItem.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <span class="text-gray-600">📄</span>
-                        <span class="text-sm text-gray-700">${file.name}</span>
-                        <span class="text-xs text-green-600">✓ Ready for AI</span>
-                    </div>
-                    <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">×</button>
-                `;
-                fileList.appendChild(fileItem);
-            });
-            
-            console.log('File removed. Remaining files:', uploadedFiles.map(f => f.name));
+            document.getElementById('fileInput').value = '';
         }
 
         function submitInterview() {
@@ -979,7 +865,7 @@
             
             // Get document insights
             const documentInsights = window.documentInsights || {};
-            const hasDocuments = uploadedFiles.length > 0;
+            const hasDocuments = uploadedFileContents.length > 0;
             
             // Populate summary content
             const summaryContent = document.getElementById('summaryContent');
@@ -993,7 +879,7 @@
                     </div>
                     <div class="bg-white p-4 rounded-lg">
                         <h4 class="font-semibold text-gray-800 mb-2">Documents</h4>
-                        <p class="text-sm text-gray-600">${uploadedFiles.length} file(s) uploaded</p>
+                        <p class="text-sm text-gray-600">${uploadedFileContents.length} file(s) uploaded</p>
                         ${hasDocuments ? '<p class="text-xs text-green-600 mt-1">✓ Documents analyzed by AI</p>' : ''}
                     </div>
                 </div>
@@ -1122,7 +1008,7 @@
                     size: document.getElementById('companySize').value || 'Not specified',
                     industry: document.getElementById('companyIndustry').value || 'Not specified',
                     culture: window.interviewAnswers || [],
-                    documents: uploadedFiles.map(f => f.name)
+                    documents: uploadedFileContents.map(f => f.name)
                 };
 
                 const response = await fetch('/api/ai-chat', {
@@ -1216,61 +1102,39 @@
             console.log('File input clicked!');
         }
 
-        // Initialize the app
+        // Initialize the app and event listeners
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Onbora app loaded successfully!');
             showView('landing');
             
-            // Set initial agent as active
             document.querySelector('[data-agent="maya"]').classList.add('bg-blue-50', 'border-blue-200');
- 
-             // Add drag-and-drop listeners
-             const dropZone = document.getElementById('dropZone');
-             const fileInput = document.getElementById('fileInput');
 
-            // Attach non-inline listeners to avoid CSP blocking inline handlers
-            if (fileInput) {
+            // --- Proven File Upload Listeners ---
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            if (dropZone && fileInput) {
+                dropZone.addEventListener('click', () => fileInput.click());
                 fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
-            }
 
-            if (dropZone) {
-                // Make drop zone clickable to open file dialog
-                dropZone.addEventListener('click', () => fileInput && fileInput.click());
-            }
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }, false);
+                });
 
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, preventDefaults, false);
-            });
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.add('border-blue-400', 'bg-blue-50'), false);
+                });
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, () => dropZone.classList.remove('border-blue-400', 'bg-blue-50'), false);
+                });
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, highlight, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, unhighlight, false);
-            });
-
-            function highlight(e) {
-                dropZone.classList.add('border-blue-500');
-                dropZone.classList.add('bg-blue-50');
-            }
-
-            function unhighlight(e) {
-                dropZone.classList.remove('border-blue-500');
-                dropZone.classList.remove('bg-blue-50');
-            }
-
-            dropZone.addEventListener('drop', handleDrop, false);
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFileUpload(files);
+                dropZone.addEventListener('drop', (e) => handleFileUpload(e.dataTransfer.files), false);
+            } else {
+                console.error('File upload UI elements (dropZone or fileInput) not found.');
             }
         });
     </script>
