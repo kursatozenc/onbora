@@ -423,7 +423,7 @@
                                 onclick="showView('employee')"
                                 class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition"
                             >
-                                Preview Your Agents
+                                Preview Your Onboarding Agents
                             </button>
                         </div>
                     </div>
@@ -467,6 +467,29 @@
                         <p class="text-xs text-green-700">
                             Powered by Google Gemini • Company context loaded • Documents analyzed
                         </p>
+                    </div>
+                    
+                    <!-- Invite New Employees -->
+                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                        <h3 class="text-sm font-medium text-blue-800 mb-3">🎉 Ready to Onboard!</h3>
+                        <p class="text-xs text-blue-700 mb-4">Your AI onboarding team is ready. Invite new employees to experience it!</p>
+                        
+                        <div class="space-y-3">
+                            <button 
+                                onclick="copyInvitationLink()"
+                                class="w-full bg-blue-600 text-white text-sm px-3 py-2 rounded-lg hover:bg-blue-700 transition"
+                            >
+                                📋 Copy Invitation Link
+                            </button>
+                            <button 
+                                onclick="showEmailInvite()"
+                                class="w-full bg-white border border-blue-300 text-blue-700 text-sm px-3 py-2 rounded-lg hover:bg-blue-50 transition"
+                            >
+                                ✉️ Send Email Invitation
+                            </button>
+                        </div>
+                        
+                        <div id="invitationResult" class="mt-3 text-xs hidden"></div>
                     </div>
                     
                     <div class="space-y-3">
@@ -808,6 +831,9 @@ Return ONLY a valid JSON object with this exact structure:
 
                 const prompt = `${documentContent}\n\nPlease analyze these documents and return the JSON structure requested.`;
 
+                console.log('🔍 Sending document analysis request to API...');
+                console.log('🔍 Document content length:', documentContent.length);
+                
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: {
@@ -818,6 +844,8 @@ Return ONLY a valid JSON object with this exact structure:
                         systemPrompt: systemPrompt
                     })
                 });
+                
+                console.log('🔍 API response status:', response.status);
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1172,8 +1200,11 @@ Keep the question under 50 words and be warm and professional.`;
                 
                 // Check if interview is complete
                 if (interviewQuestionIndex >= 2) { // 3 questions total (0-2)
-                    // Interview complete - show summary immediately
-                    showInterviewSummary();
+                    // Interview complete - show completion message then summary
+                    addInterviewMessage("Thank you! I've captured everything I need to create your personalized onboarding agents.", false);
+                    setTimeout(() => {
+                        showInterviewSummary();
+                    }, 2000);
                 } else {
                     // Add AI response and continue
                     addInterviewMessage(data.response, false);
@@ -1438,6 +1469,54 @@ Keep the question under 50 words and be warm and professional.`;
                     </div>
                 </div>
             `;
+        }
+
+        // Invitation functionality
+        function copyInvitationLink() {
+            const companyName = document.getElementById('companyName')?.value || 'Your Company';
+            const invitationUrl = `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(companyName)}`;
+            
+            navigator.clipboard.writeText(invitationUrl).then(() => {
+                showInvitationResult('✅ Invitation link copied to clipboard!', 'success');
+            }).catch(() => {
+                showInvitationResult('❌ Failed to copy link. Please copy manually: ' + invitationUrl, 'error');
+            });
+        }
+        
+        function showEmailInvite() {
+            const companyName = document.getElementById('companyName')?.value || 'Your Company';
+            const invitationUrl = `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(companyName)}`;
+            
+            const subject = `Welcome to ${companyName} - Your AI Onboarding Experience Awaits!`;
+            const body = `Hi there!
+
+Welcome to ${companyName}! We're excited to have you join our team.
+
+We've prepared a personalized AI-powered onboarding experience just for you. Our AI agents Maya, Alex, Jordan, and Sam are ready to help you get started, answer questions, and make your first days amazing.
+
+Click here to begin your onboarding journey:
+${invitationUrl}
+
+Looking forward to working with you!
+
+Best regards,
+The ${companyName} Team`;
+
+            const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoUrl);
+            
+            showInvitationResult('📧 Email client opened with invitation template!', 'success');
+        }
+        
+        function showInvitationResult(message, type) {
+            const resultDiv = document.getElementById('invitationResult');
+            resultDiv.textContent = message;
+            resultDiv.className = `mt-3 text-xs ${type === 'success' ? 'text-green-700' : 'text-red-700'}`;
+            resultDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                resultDiv.classList.add('hidden');
+            }, 5000);
         }
 
         // Initialize the app
