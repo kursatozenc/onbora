@@ -480,6 +480,9 @@
                     alert('Please enter your company name');
                     return;
                 }
+                
+                // Setup file upload listeners when step 2 becomes visible
+                setupFileUploadListeners();
             }
             
             if (step === 3) {
@@ -489,6 +492,44 @@
             document.getElementById(`step${currentStep}`).classList.add('hidden');
             document.getElementById(`step${step}`).classList.remove('hidden');
             currentStep = step;
+        }
+
+        function setupFileUploadListeners() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            if (dropZone && fileInput) {
+                console.log('Setting up file upload listeners...');
+                
+                // Remove any existing listeners first
+                dropZone.replaceWith(dropZone.cloneNode(true));
+                const newDropZone = document.getElementById('dropZone');
+                const newFileInput = document.getElementById('fileInput');
+                
+                newDropZone.addEventListener('click', () => newFileInput.click());
+                newFileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
+
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    newDropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }, false);
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    newDropZone.addEventListener(eventName, () => newDropZone.classList.add('border-blue-400', 'bg-blue-50'), false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    newDropZone.addEventListener(eventName, () => newDropZone.classList.remove('border-blue-400', 'bg-blue-50'), false);
+                });
+
+                newDropZone.addEventListener('drop', (e) => handleFileUpload(e.dataTransfer.files), false);
+                
+                console.log('File upload listeners attached successfully!');
+            } else {
+                console.error('File upload UI elements (dropZone or fileInput) not found.');
+            }
         }
 
         async function startDocumentAnalysis() {
@@ -1110,32 +1151,7 @@
             document.querySelector('[data-agent="maya"]').classList.add('bg-blue-50', 'border-blue-200');
 
             // --- Proven File Upload Listeners ---
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
-
-            if (dropZone && fileInput) {
-                dropZone.addEventListener('click', () => fileInput.click());
-                fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
-
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    dropZone.addEventListener(eventName, (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }, false);
-                });
-
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    dropZone.addEventListener(eventName, () => dropZone.classList.add('border-blue-400', 'bg-blue-50'), false);
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    dropZone.addEventListener(eventName, () => dropZone.classList.remove('border-blue-400', 'bg-blue-50'), false);
-                });
-
-                dropZone.addEventListener('drop', (e) => handleFileUpload(e.dataTransfer.files), false);
-            } else {
-                console.error('File upload UI elements (dropZone or fileInput) not found.');
-            }
+            // The file upload listeners are now attached in nextStep(2)
         });
     </script>
 </body>
