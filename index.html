@@ -1223,10 +1223,20 @@
             
             // Set initial agent as active
             document.querySelector('[data-agent="maya"]').classList.add('bg-blue-50', 'border-blue-200');
+ 
+             // Add drag-and-drop listeners
+             const dropZone = document.getElementById('dropZone');
+             const fileInput = document.getElementById('fileInput');
 
-            // Add drag-and-drop listeners
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
+            // Attach non-inline listeners to avoid CSP blocking inline handlers
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
+            }
+
+            if (dropZone) {
+                // Make drop zone clickable to open file dialog
+                dropZone.addEventListener('click', () => fileInput && fileInput.click());
+            }
 
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 dropZone.addEventListener(eventName, preventDefaults, false);
