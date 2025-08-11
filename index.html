@@ -138,11 +138,15 @@
                         Upload your employee handbook, policies, or any other documents that new hires should know about. (e.g., .txt, .md, .pdf)
                     </p>
                     
-                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition hover:bg-gray-50">
+                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition hover:bg-gray-50" 
+                         onclick="document.getElementById('fileInput').click();"
+                         ondragover="event.preventDefault(); this.classList.add('border-blue-400', 'bg-blue-50');"
+                         ondragleave="this.classList.remove('border-blue-400', 'bg-blue-50');"
+                         ondrop="event.preventDefault(); this.classList.remove('border-blue-400', 'bg-blue-50'); handleFileUpload(event.dataTransfer.files);">
                         <div class="text-4xl mb-4">📄</div>
                         <p class="text-gray-600 mb-2">Drag & drop files here, or click to browse</p>
                         <p class="text-sm text-gray-500">AI will analyze text-based files to fuel the interview.</p>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.md" class="hidden">
+                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.md" class="hidden" onchange="handleFileUpload(this.files);">
                     </div>
 
                     <div id="fileList" class="mt-4 space-y-2"></div>
@@ -480,9 +484,6 @@
                     alert('Please enter your company name');
                     return;
                 }
-                
-                // Setup file upload listeners when step 2 becomes visible
-                setupFileUploadListeners();
             }
             
             if (step === 3) {
@@ -492,44 +493,6 @@
             document.getElementById(`step${currentStep}`).classList.add('hidden');
             document.getElementById(`step${step}`).classList.remove('hidden');
             currentStep = step;
-        }
-
-        function setupFileUploadListeners() {
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
-
-            if (dropZone && fileInput) {
-                console.log('Setting up file upload listeners...');
-                
-                // Remove any existing listeners first
-                dropZone.replaceWith(dropZone.cloneNode(true));
-                const newDropZone = document.getElementById('dropZone');
-                const newFileInput = document.getElementById('fileInput');
-                
-                newDropZone.addEventListener('click', () => newFileInput.click());
-                newFileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
-
-                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    newDropZone.addEventListener(eventName, (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }, false);
-                });
-
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    newDropZone.addEventListener(eventName, () => newDropZone.classList.add('border-blue-400', 'bg-blue-50'), false);
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    newDropZone.addEventListener(eventName, () => newDropZone.classList.remove('border-blue-400', 'bg-blue-50'), false);
-                });
-
-                newDropZone.addEventListener('drop', (e) => handleFileUpload(e.dataTransfer.files), false);
-                
-                console.log('File upload listeners attached successfully!');
-            } else {
-                console.error('File upload UI elements (dropZone or fileInput) not found.');
-            }
         }
 
         async function startDocumentAnalysis() {
@@ -1143,15 +1106,18 @@
             console.log('File input clicked!');
         }
 
-        // Initialize the app and event listeners
+        // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Onbora app loaded successfully!');
             showView('landing');
             
-            document.querySelector('[data-agent="maya"]').classList.add('bg-blue-50', 'border-blue-200');
-
-            // --- Proven File Upload Listeners ---
-            // The file upload listeners are now attached in nextStep(2)
+            // Set initial agent as active  
+            const mayaAgent = document.querySelector('[data-agent="maya"]');
+            if (mayaAgent) {
+                mayaAgent.classList.add('bg-blue-50', 'border-blue-200');
+            }
+            
+            console.log('App initialization complete');
         });
     </script>
 </body>

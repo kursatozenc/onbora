@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug File Upload</title>
+</head>
+<body>
+    <h1>File Upload Debug Test</h1>
+    
+    <div id="test1">
+        <h2>Test 1: Basic File Input</h2>
+        <input type="file" id="basicInput" multiple>
+        <div id="basicResult"></div>
+    </div>
+    
+    <div id="test2">
+        <h2>Test 2: Click Handler</h2>
+        <button id="clickBtn">Click Me</button>
+        <div id="clickResult"></div>
+    </div>
+    
+    <div id="test3">
+        <h2>Test 3: Drop Zone</h2>
+        <div id="dropZone" style="border: 2px dashed #ccc; padding: 20px; margin: 10px;">
+            Drop files here
+        </div>
+        <div id="dropResult"></div>
+    </div>
+
+    <script>
+        console.log('Debug page loaded');
+        
+        // Test 1: Basic file input
+        document.getElementById('basicInput').addEventListener('change', function(e) {
+            console.log('Basic input changed:', e.target.files.length, 'files');
+            document.getElementById('basicResult').innerHTML = `Selected ${e.target.files.length} files`;
+        });
+        
+        // Test 2: Click handler
+        document.getElementById('clickBtn').addEventListener('click', function() {
+            console.log('Button clicked');
+            document.getElementById('clickResult').innerHTML = 'Button works!';
+        });
+        
+        // Test 3: Drop zone
+        const dropZone = document.getElementById('dropZone');
+        
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            console.log('Dragover');
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            console.log('Drop:', e.dataTransfer.files.length, 'files');
+            document.getElementById('dropResult').innerHTML = `Dropped ${e.dataTransfer.files.length} files`;
+        });
+        
+        dropZone.addEventListener('click', function() {
+            console.log('Drop zone clicked');
+            document.getElementById('basicInput').click();
+        });
+    </script>
+</body>
+</html> 
