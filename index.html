@@ -137,11 +137,11 @@
                     <p class="text-gray-600 mb-6">
                         Upload your employee handbook, policies, or any other documents that new hires should know about.
                     </p>
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
+                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
                         <div class="text-4xl mb-4">📄</div>
                         <p class="text-gray-600 mb-4">Drag and drop files here, or click to browse</p>
                         <p class="text-sm text-blue-600 mb-4">Documents will be analyzed by AI agents to provide personalized responses</p>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" onchange="handleFileUpload(event)">
+                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" class="hidden" onchange="handleFileUpload(this.files)">
                         <button onclick="testFileUpload()" class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition">
                             Choose Files
                         </button>
@@ -691,11 +691,9 @@
             currentStep = step;
         }
 
-        function handleFileUpload(event) {
-            console.log('handleFileUpload called with event:', event);
-            console.log('Event target files:', event.target.files);
+        function handleFileUpload(files) {
+            console.log('handleFileUpload called with files:', files);
             
-            const files = event.target.files;
             if (!files || files.length === 0) {
                 console.log('No files selected');
                 return;
@@ -773,6 +771,10 @@
                 `;
                 fileList.appendChild(successDiv);
                 uploadStatus.classList.remove('hidden'); // Show success status
+                
+                // Reset file input so selecting the same file again triggers change
+                const hiddenInput = document.getElementById('fileInput');
+                if (hiddenInput) hiddenInput.value = '';
                 
                 // Remove success message after 5 seconds
                 setTimeout(() => {
@@ -1195,6 +1197,45 @@
             
             // Set initial agent as active
             document.querySelector('[data-agent="maya"]').classList.add('bg-blue-50', 'border-blue-200');
+
+            // Add drag-and-drop listeners
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropZone.classList.add('border-blue-500');
+                dropZone.classList.add('bg-blue-50');
+            }
+
+            function unhighlight(e) {
+                dropZone.classList.remove('border-blue-500');
+                dropZone.classList.remove('bg-blue-50');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFileUpload(files);
+            }
         });
     </script>
 </body>
