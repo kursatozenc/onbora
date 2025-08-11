@@ -145,6 +145,14 @@
                         <button onclick="document.getElementById('fileInput').click()" class="bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition">
                             Choose Files
                         </button>
+                        
+                        <!-- Upload Status -->
+                        <div id="uploadStatus" class="mt-4 hidden">
+                            <div class="flex items-center justify-center space-x-2 text-green-600">
+                                <span>✓</span>
+                                <span class="text-sm">Files uploaded successfully!</span>
+                            </div>
+                        </div>
                     </div>
                     <div id="fileList" class="mt-4 space-y-2"></div>
                     
@@ -420,10 +428,11 @@
     </div>
 
     <script>
+        // Global variables
         let currentStep = 1;
-        let interviewQuestionIndex = 0;
-        let currentAgent = 'maya';
         let uploadedFiles = [];
+        let currentAgent = 'maya';
+        let interviewQuestionIndex = 0;
         
         const interviewQuestions = [
             "That's great! Now, what are the core values that drive your team? What principles guide how you work together?",
@@ -504,6 +513,9 @@
             const documentAnalysis = document.getElementById('documentAnalysis');
             const interview = document.getElementById('interview');
             
+            console.log('Starting document analysis...');
+            console.log('Uploaded files:', uploadedFiles.map(f => f.name));
+            
             // Show analysis in progress
             documentAnalysis.classList.remove('hidden');
             interview.classList.add('hidden');
@@ -512,7 +524,19 @@
                 // Analyze uploaded documents if any
                 let documentInsights = {};
                 if (uploadedFiles.length > 0) {
+                    console.log('Analyzing documents with AI...');
                     documentInsights = await analyzeDocuments();
+                    console.log('Document insights:', documentInsights);
+                } else {
+                    console.log('No documents uploaded, using default insights');
+                    documentInsights = {
+                        values: "Needs: company culture description",
+                        policies: "Needs: work policies and procedures",
+                        structure: "Needs: company structure details",
+                        industry: "Needs: industry and business focus",
+                        benefits: "Needs: employee benefits information",
+                        traditions: "Needs: company traditions and unique aspects"
+                    };
                 }
                 
                 // Store insights for the interview
@@ -669,23 +693,34 @@
 
         function handleFileUpload(event) {
             const files = event.target.files;
+            if (!files || files.length === 0) return;
+            
             const fileList = document.getElementById('fileList');
             const docProcessingStatus = document.getElementById('docProcessingStatus');
+            const uploadStatus = document.getElementById('uploadStatus');
+            
+            // Clear previous file list
+            fileList.innerHTML = '';
             
             // Show processing status
             docProcessingStatus.classList.remove('hidden');
+            uploadStatus.classList.add('hidden'); // Hide success status
             
+            // Process each file
             for (let file of files) {
+                // Add to global array
                 uploadedFiles.push(file);
+                
+                // Create file item
                 const fileItem = document.createElement('div');
-                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2';
                 fileItem.innerHTML = `
                     <div class="flex items-center space-x-2">
                         <span class="text-gray-600">📄</span>
                         <span class="text-sm text-gray-700">${file.name}</span>
                         <span class="text-xs text-blue-600">Processing...</span>
                     </div>
-                    <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm">×</button>
+                    <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">×</button>
                 `;
                 fileList.appendChild(fileItem);
             }
@@ -706,7 +741,7 @@
                 
                 // Show success message
                 const successDiv = document.createElement('div');
-                successDiv.className = 'mt-2 p-2 bg-green-50 border border-green-200 rounded-lg';
+                successDiv.className = 'mt-3 p-3 bg-green-50 border border-green-200 rounded-lg';
                 successDiv.innerHTML = `
                     <div class="flex items-center space-x-2">
                         <span class="text-green-600">✓</span>
@@ -714,6 +749,7 @@
                     </div>
                 `;
                 fileList.appendChild(successDiv);
+                uploadStatus.classList.remove('hidden'); // Show success status
                 
                 // Remove success message after 5 seconds
                 setTimeout(() => {
@@ -722,26 +758,35 @@
                     }
                 }, 5000);
                 
+                console.log('Files uploaded:', uploadedFiles.map(f => f.name));
+                
             }, 2000);
         }
 
         function removeFile(fileName) {
+            // Remove from global array
             uploadedFiles = uploadedFiles.filter(f => f.name !== fileName);
+            
             // Refresh file list display
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '';
+            
+            // Re-display remaining files
             uploadedFiles.forEach(file => {
                 const fileItem = document.createElement('div');
-                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+                fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2';
                 fileItem.innerHTML = `
                     <div class="flex items-center space-x-2">
                         <span class="text-gray-600">📄</span>
                         <span class="text-sm text-gray-700">${file.name}</span>
+                        <span class="text-xs text-green-600">✓ Ready for AI</span>
                     </div>
-                    <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm">×</button>
+                    <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">×</button>
                 `;
                 fileList.appendChild(fileItem);
             });
+            
+            console.log('File removed. Remaining files:', uploadedFiles.map(f => f.name));
         }
 
         function submitInterview() {
