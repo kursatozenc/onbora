@@ -431,6 +431,7 @@
         // Global variables
         let currentStep = 1;
         let uploadedFiles = [];
+        let uploadedFileContents = [];
         let currentAgent = 'maya';
         let interviewQuestionIndex = 0;
         
@@ -580,7 +581,8 @@
                         5. Employee benefits and perks
                         6. Company traditions or unique aspects
                         
-                        Document names: ${uploadedFiles.map(f => f.name).join(', ')}
+                        Documents provided (names and optional partial contents):
+                        ${uploadedFileContents.map(d => `- ${d.name}${d.content ? `\nContent (may be truncated):\n${d.content}` : ' (content not readable in browser)'}`).join('\n')}
                         
                         Return a JSON object with these categories and what you found. If information is missing or unclear, mark it as "needs_clarification".
                         
@@ -717,12 +719,14 @@
             
             // Clear previous file list
             fileList.innerHTML = '';
+            uploadedFileContents = [];
             
             // Show processing status
             docProcessingStatus.classList.remove('hidden');
             uploadStatus.classList.add('hidden'); // Hide success status
             
             // Process each file
+            const readPromises = [];
             for (let file of files) {
                 console.log('Processing file:', file.name, file.size, file.type);
                 
@@ -741,12 +745,34 @@
                     <button onclick="removeFile('${file.name}')" class="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">×</button>
                 `;
                 fileList.appendChild(fileItem);
+
+                // Read text content for supported types
+                const isReadableText = file.type.startsWith('text/') || /\.(txt|md)$/i.test(file.name);
+                if (isReadableText) {
+                    const p = new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const content = String(reader.result || '').slice(0, 8000);
+                            uploadedFileContents.push({ name: file.name, type: file.type || 'text/plain', content });
+                            resolve();
+                        };
+                        reader.onerror = () => {
+                            console.warn('Failed to read file content:', file.name);
+                            resolve();
+                        };
+                        reader.readAsText(file);
+                    });
+                    readPromises.push(p);
+                } else {
+                    // Store metadata only for non-text files
+                    uploadedFileContents.push({ name: file.name, type: file.type || 'application/octet-stream', content: '' });
+                }
             }
             
             console.log('Total uploaded files:', uploadedFiles.length);
             
-            // Simulate document processing completion
-            setTimeout(() => {
+            // After reading completes, update UI
+            Promise.all(readPromises).then(() => {
                 console.log('Processing complete, updating UI...');
                 docProcessingStatus.classList.add('hidden');
                 
@@ -784,8 +810,8 @@
                 }, 5000);
                 
                 console.log('Files uploaded:', uploadedFiles.map(f => f.name));
-                
-            }, 2000);
+                console.log('Uploaded file contents (summaries):', uploadedFileContents.map(f => ({ name: f.name, type: f.type, contentPreview: f.content ? f.content.slice(0, 120) : '' })));
+            });
         }
 
         function removeFile(fileName) {
