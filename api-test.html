@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gemini API Test - Onbora</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .test-box {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        .success { border-color: #4CAF50; background: #f1f8e9; }
+        .error { border-color: #f44336; background: #ffebee; }
+        .loading { border-color: #2196F3; background: #e3f2fd; }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #005a85; }
+        .console {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: scroll;
+            margin: 10px 0;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Gemini API Test for Onbora</h1>
+    <p>This page tests if the Gemini API integration is working properly.</p>
+
+    <div class="test-box">
+        <h3>🔑 API Key Status</h3>
+        <div id="apiKeyStatus">Testing API key configuration...</div>
+    </div>
+
+    <div class="test-box">
+        <h3>🤖 AI Response Test</h3>
+        <input type="text" id="testPrompt" placeholder="Enter a test prompt (e.g., 'What is onboarding?')" value="What is employee onboarding?">
+        <button onclick="testAI()">Test AI Response</button>
+        <div id="aiTestResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>📄 Document Analysis Test</h3>
+        <button onclick="testDocumentAnalysis()">Test Document Analysis</button>
+        <div id="docTestResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>💬 Agent Chat Test</h3>
+        <button onclick="testAgentChat()">Test Agent Chat</button>
+        <div id="chatTestResult"></div>
+    </div>
+
+    <div class="test-box">
+        <h3>📊 Console Output</h3>
+        <div id="console" class="console"></div>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            console.innerHTML += `${timestamp}: ${message}<br>`;
+            console.scrollTop = console.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'loading') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = `test-box ${type}`;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+        }
+
+        async function testApiKey() {
+            log('🔍 Testing API key configuration...');
+            
+            try {
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: 'Test connection'
+                    })
+                });
+
+                log(`📡 API response status: ${response.status}`);
+                
+                if (response.status === 500) {
+                    const data = await response.json();
+                    if (data.error === 'AI service not configured') {
+                        setStatus('apiKeyStatus', '❌ API Key not configured in environment variables', 'error');
+                        log('❌ GEMINI_API_KEY environment variable is missing');
+                        return false;
+                    }
+                }
+
+                if (response.ok) {
+                    setStatus('apiKeyStatus', '✅ API Key is configured and working', 'success');
+                    log('✅ API key is properly configured');
+                    return true;
+                } else {
+                    const data = await response.json();
+                    setStatus('apiKeyStatus', `❌ API Error: ${data.error}`, 'error');
+                    log(`❌ API Error: ${data.error}`);
+                    return false;
+                }
+            } catch (error) {
+                setStatus('apiKeyStatus', `❌ Connection Error: ${error.message}`, 'error');
+                log(`❌ Connection Error: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function testAI() {
+            const prompt = document.getElementById('testPrompt').value;
+            log(`🤖 Testing AI with prompt: "${prompt}"`);
+            
+            setStatus('aiTestResult', 'Testing AI response...', 'loading');
+
+            try {
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        systemPrompt: 'You are a helpful AI assistant for employee onboarding.'
+                    })
+                });
+
+                log(`📡 AI test response status: ${response.status}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus('aiTestResult', `✅ AI Response: ${data.response}`, 'success');
+                    log(`✅ AI responded successfully: ${data.response.substring(0, 100)}...`);
+                } else {
+                    const data = await response.json();
+                    setStatus('aiTestResult', `❌ AI Test Failed: ${data.error}`, 'error');
+                    log(`❌ AI test failed: ${data.error}`);
+                }
+            } catch (error) {
+                setStatus('aiTestResult', `❌ Test Error: ${error.message}`, 'error');
+                log(`❌ AI test error: ${error.message}`);
+            }
+        }
+
+        async function testDocumentAnalysis() {
+            log('📄 Testing document analysis endpoint...');
+            setStatus('docTestResult', 'Testing document analysis...', 'loading');
+
+            const testDoc = {
+                name: 'test-policy.txt',
+                content: 'Company Values: Innovation, Collaboration, Excellence. Work Hours: 9-5 Monday-Friday. Benefits: Health insurance, 401k, paid time off.'
+            };
+
+            try {
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: `Document: ${testDoc.name}\nContent: ${testDoc.content}\n\nPlease analyze this document and return JSON with company insights.`,
+                        systemPrompt: 'You are an expert HR analyst. Extract key company information and return structured JSON.'
+                    })
+                });
+
+                log(`📡 Document analysis response status: ${response.status}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus('docTestResult', `✅ Document Analysis Working: ${data.response.substring(0, 200)}...`, 'success');
+                    log(`✅ Document analysis successful`);
+                } else {
+                    const data = await response.json();
+                    setStatus('docTestResult', `❌ Document Analysis Failed: ${data.error}`, 'error');
+                    log(`❌ Document analysis failed: ${data.error}`);
+                }
+            } catch (error) {
+                setStatus('docTestResult', `❌ Analysis Error: ${error.message}`, 'error');
+                log(`❌ Document analysis error: ${error.message}`);
+            }
+        }
+
+        async function testAgentChat() {
+            log('💬 Testing agent chat endpoint...');
+            setStatus('chatTestResult', 'Testing agent chat...', 'loading');
+
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'What should I do on my first day?',
+                        agentType: 'maya',
+                        companyContext: {
+                            name: 'Test Company',
+                            size: '50 employees',
+                            industry: 'Technology',
+                            insights: { values: 'Innovation and collaboration' }
+                        },
+                        isSmartMode: true
+                    })
+                });
+
+                log(`📡 Agent chat response status: ${response.status}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setStatus('chatTestResult', `✅ Agent Chat Working: ${data.response}`, 'success');
+                    log(`✅ Agent chat successful`);
+                } else {
+                    const data = await response.json();
+                    setStatus('chatTestResult', `❌ Agent Chat Failed: ${data.message || data.error}`, 'error');
+                    log(`❌ Agent chat failed: ${data.message || data.error}`);
+                }
+            } catch (error) {
+                setStatus('chatTestResult', `❌ Chat Error: ${error.message}`, 'error');
+                log(`❌ Agent chat error: ${error.message}`);
+            }
+        }
+
+        // Run initial API key test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 API Test page loaded');
+            testApiKey();
+        });
+    </script>
+</body>
+</html>
