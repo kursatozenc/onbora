@@ -458,6 +458,18 @@
                 <div class="w-80 bg-white border-r border-gray-200 p-6 overflow-y-auto">
                     <h2 class="text-xl font-bold mb-6">Your AI Team</h2>
                     
+                    <!-- Welcome Message -->
+                    <div class="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                        <h3 class="text-sm font-medium text-purple-800 mb-2">🎯 Welcome to Your AI Onboarding Team!</h3>
+                        <p class="text-xs text-purple-700 mb-3">
+                            Your AI agents are ready and trained with your company's specific information. 
+                            They can answer questions, provide guidance, and help new employees get started.
+                        </p>
+                        <p class="text-xs text-purple-700">
+                            <strong>How to use:</strong> Select an agent below, then ask them anything about your company!
+                        </p>
+                    </div>
+                    
                     <!-- AI Status Indicator -->
                     <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                         <div class="flex items-center space-x-2 mb-2">
@@ -605,6 +617,28 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Quick Start Options -->
+                            <div class="flex justify-start">
+                                <div class="max-w-lg">
+                                    <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 mr-12">
+                                        <p class="text-gray-800 mb-3">
+                                            <strong>Quick Start:</strong> Try asking me about:
+                                        </p>
+                                        <div class="space-y-2">
+                                            <button onclick="askQuickQuestion('What should I do on my first day?')" class="block w-full text-left text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition">
+                                                🚀 "What should I do on my first day?"
+                                            </button>
+                                            <button onclick="askQuickQuestion('What are the company values?')" class="block w-full text-left text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition">
+                                                🎯 "What are the company values?"
+                                            </button>
+                                            <button onclick="askQuickQuestion('How do I get help with HR questions?')" class="block w-full text-left text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition">
+                                                📋 "How do I get help with HR questions?"
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -642,13 +676,9 @@
         window.documentInsights = {};
 
         const interviewQuestions = [
-            "That's great! Now, what are the core values that drive your team? What principles guide how you work together?",
-            "Perfect! What should new employees know about your work style? Are you more collaborative or independent? Fast-paced or methodical?",
-            "Excellent insights! What are the most important things a new hire should accomplish in their first day?",
-            "Very helpful! How about the first week - what key milestones should they hit?",
-            "Almost done! What unique traditions, perks, or aspects of your company would make new hires excited to join?",
-            "Last question - what's the one piece of advice you'd give to someone starting at your company tomorrow?",
-            "Thank you so much! I've captured everything I need to create a personalized onboarding experience for your new hires."
+            "What are the core values that drive your team? What principles guide how you work together?",
+            "What should new employees know about your work style and priorities?",
+            "What unique traditions or aspects of your company would make new hires excited to join?"
         ];
 
         const agents = {
@@ -1005,6 +1035,17 @@ Keep the question under 50 words and be warm and professional.`;
                 return "Great documentation! To round out the picture, what's the one piece of advice you'd give someone starting at your company tomorrow?";
             }
         }
+        
+        function shouldSkipQuestion(questionIndex, insights) {
+            // Skip questions if we already have good information from documents
+            if (questionIndex === 0 && insights.values && !insights.values.includes('Needs clarification')) {
+                return true; // Skip values question if we have them
+            }
+            if (questionIndex === 1 && insights.policies && !insights.policies.includes('Needs clarification')) {
+                return true; // Skip work style question if we have policies
+            }
+            return false;
+        }
 
         function getPriorityTopics(insights) {
             const topics = [];
@@ -1200,11 +1241,11 @@ Keep the question under 50 words and be warm and professional.`;
                 
                 // Check if interview is complete
                 if (interviewQuestionIndex >= 2) { // 3 questions total (0-2)
-                    // Interview complete - show completion message then summary
-                    addInterviewMessage("Thank you! I've captured everything I need to create your personalized onboarding agents.", false);
+                    // Interview complete - show completion message then auto-advance
+                    addInterviewMessage("Perfect! I've captured everything I need to create your personalized onboarding agents. Let me prepare your summary...", false);
                     setTimeout(() => {
                         showInterviewSummary();
-                    }, 2000);
+                    }, 1500);
                 } else {
                     // Add AI response and continue
                     addInterviewMessage(data.response, false);
@@ -1532,6 +1573,15 @@ The ${companyName} Team`;
             setTimeout(() => {
                 resultDiv.classList.add('hidden');
             }, 5000);
+        }
+        
+        function askQuickQuestion(question) {
+            // Set the question in the input field
+            const chatInput = document.getElementById('chatInput');
+            chatInput.value = question;
+            
+            // Send the message
+            sendMessage();
         }
 
         // Initialize the app
