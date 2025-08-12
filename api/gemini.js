@@ -25,13 +25,14 @@ export default async function handler(req, res) {
       });
     }
 
-    // Prepare the request to Gemini
+    // Prepare the request to Gemini with proper format
     const geminiRequest = {
       contents: [
         {
+          role: "user",
           parts: [
             {
-              text: systemPrompt || `You are a helpful AI assistant. Respond to: ${prompt}`
+              text: systemPrompt ? `${systemPrompt}\n\nUser: ${prompt}` : prompt
             }
           ]
         }
@@ -41,28 +42,10 @@ export default async function handler(req, res) {
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 1024,
-      },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
-        }
-      ]
+      }
     };
 
-    // Call Gemini API
+    // Call Gemini API with correct endpoint
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
@@ -73,6 +56,9 @@ export default async function handler(req, res) {
         body: JSON.stringify(geminiRequest)
       }
     );
+    
+    console.log('🔍 Gemini API request sent');
+    console.log('🔍 Request body:', JSON.stringify(geminiRequest, null, 2));
 
     if (!response.ok) {
       const errorData = await response.json();

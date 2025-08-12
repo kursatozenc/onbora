@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple API Test</title>
+</head>
+<body>
+    <h1>Simple API Endpoint Test</h1>
+    <button onclick="testEndpoint()">Test API Endpoint</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testEndpoint() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                console.log('Testing /api/gemini endpoint...');
+                
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: 'Hello, can you tell me what onboarding means?',
+                        systemPrompt: 'You are a helpful HR assistant specializing in employee onboarding.'
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error response:', errorData);
+                    result.innerHTML = `
+                        <h3>❌ Error Status: ${response.status}</h3>
+                        <pre>${JSON.stringify(errorData, null, 2)}</pre>
+                    `;
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('Success response data:', data);
+                
+                result.innerHTML = `
+                    <h3>✅ Success! Response Status: ${response.status}</h3>
+                    <h4>AI Response:</h4>
+                    <p>${data.response}</p>
+                    <h4>Full Response Data:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                result.innerHTML = `<h3>❌ Network Error: ${error.message}</h3>`;
+            }
+        }
+    </script>
+</body>
+</html>

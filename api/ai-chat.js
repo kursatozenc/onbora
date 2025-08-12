@@ -72,6 +72,7 @@ export default async function handler(req, res) {
     const geminiRequest = {
       contents: [
         {
+          role: "user",
           parts: [
             {
               text: systemPrompt + "\n\nUser message: " + message
