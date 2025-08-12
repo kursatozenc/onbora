@@ -1369,6 +1369,8 @@ Keep the question under 50 words and be warm and professional.`;
 
         async function callAIAgent(message, agentId) {
             try {
+                console.log('🤖 callAIAgent called with:', { message, agentId });
+                
                 // Remove typing indicator
                 const typingIndicator = document.getElementById('typingIndicator');
                 if (typingIndicator) typingIndicator.remove();
@@ -1386,24 +1388,37 @@ Keep the question under 50 words and be warm and professional.`;
                         'No documents uploaded'
                 };
 
+                console.log('🏢 Company context prepared:', companyContext);
+                console.log('📡 Calling /api/ai-chat endpoint...');
+
+                const requestBody = {
+                    message: message,
+                    agentType: agentId,
+                    companyContext: companyContext,
+                    isSmartMode: true
+                };
+
+                console.log('📤 Request body:', requestBody);
+
                 const response = await fetch('/api/ai-chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        message: message,
-                        agentType: agentId,
-                        companyContext: companyContext,
-                        isSmartMode: true
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', response.headers);
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json();
+                    console.error('❌ API Error:', errorData);
+                    throw new Error(`HTTP error! status: ${response.status}, error: ${JSON.stringify(errorData)}`);
                 }
 
                 const data = await response.json();
+                console.log('✅ API Response data:', data);
                 
                 // Add AI response
                 addChatMessage(data.response, false);

@@ -4,9 +4,16 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('🔍 AI Chat API called with:', {
+      method: req.method,
+      body: req.body,
+      headers: req.headers
+    });
+    
     const { message, agentType, companyContext, isSmartMode } = req.body;
 
     if (!message) {
+      console.log('❌ No message provided');
       return res.status(400).json({ message: 'Message is required' });
     }
 
@@ -88,6 +95,9 @@ export default async function handler(req, res) {
       }
     };
 
+    console.log('🔍 Sending request to Gemini API...');
+    console.log('🔍 Request body:', JSON.stringify(geminiRequest, null, 2));
+    
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
@@ -98,6 +108,8 @@ export default async function handler(req, res) {
         body: JSON.stringify(geminiRequest)
       }
     );
+    
+    console.log('🔍 Gemini API response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -119,9 +131,13 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    console.log('🔍 Gemini API response data:', JSON.stringify(data, null, 2));
+    
     const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    console.log('🔍 Extracted AI response:', aiResponse);
 
     if (!aiResponse) {
+      console.log('🔍 No AI response found, using fallback');
       // Fallback to static response
       return res.status(200).json({
         response: getStaticResponse(agentType, message),
@@ -130,6 +146,7 @@ export default async function handler(req, res) {
       });
     }
 
+    console.log('🔍 Returning successful AI response');
     return res.status(200).json({
       response: aiResponse,
       isFallback: false,
