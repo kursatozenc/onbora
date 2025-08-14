@@ -1,6 +1,7 @@
 {
   "name": "onbora",
   "version": "1.0.0",
+   "type": "module"
   "description": "AI-powered onboarding platform for new employees",
   "main": "index.html",
   "scripts": {
