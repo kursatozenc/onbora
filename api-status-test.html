@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Status Test - Onbora</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-600">🔍 API Status Test</h1>
+        
+        <div class="grid gap-6">
+            <!-- Test Results -->
+            <div id="testResults" class="space-y-4"></div>
+            
+            <!-- Test Buttons -->
+            <div class="flex flex-wrap gap-4 justify-center">
+                <button onclick="testAllAPIs()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold">
+                    🚀 Test All APIs
+                </button>
+                <button onclick="testIndividualAPI('hello')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                    Test /api/hello
+                </button>
+                <button onclick="testIndividualAPI('gemini')" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                    Test /api/gemini
+                </button>
+                <button onclick="testIndividualAPI('ai-chat')" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg">
+                    Test /api/ai-chat
+                </button>
+            </div>
+            
+            <!-- Environment Info -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">🌍 Environment Information</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <strong>Current URL:</strong><br>
+                        <span id="currentUrl" class="text-gray-600"></span>
+                    </div>
+                    <div>
+                        <strong>API Base:</strong><br>
+                        <span id="apiBase" class="text-gray-600"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Display current environment info
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('apiBase').textContent = window.location.origin + '/api';
+        
+        async function testAPI(endpoint) {
+            const baseUrl = window.location.origin;
+            const url = `${baseUrl}/api/${endpoint}`;
+            
+            try {
+                console.log(`Testing ${endpoint} at: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ test: true })
+                });
+                
+                const result = {
+                    endpoint,
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    url: url
+                };
+                
+                if (response.ok) {
+                    try {
+                        const data = await response.json();
+                        result.data = data;
+                    } catch (e) {
+                        result.data = 'Response not JSON';
+                    }
+                }
+                
+                return result;
+            } catch (error) {
+                return {
+                    endpoint,
+                    error: error.message,
+                    url: url
+                };
+            }
+        }
+        
+        async function testIndividualAPI(endpoint) {
+            const result = await testAPI(endpoint);
+            displayResult(result);
+        }
+        
+        async function testAllAPIs() {
+            const endpoints = ['hello', 'gemini', 'ai-chat'];
+            const results = [];
+            
+            for (const endpoint of endpoints) {
+                const result = await testAPI(endpoint);
+                results.push(result);
+                displayResult(result);
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            // Summary
+            const working = results.filter(r => r.ok).length;
+            const total = results.length;
+            displaySummary(working, total);
+        }
+        
+        function displayResult(result) {
+            const resultsDiv = document.getElementById('testResults');
+            
+            const statusClass = result.ok ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50';
+            const statusIcon = result.ok ? '✅' : '❌';
+            
+            const resultHtml = `
+                <div class="border-2 ${statusClass} p-4 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${statusIcon}</span>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg">/api/${result.endpoint}</h3>
+                            <p class="text-sm text-gray-600">${result.url}</p>
+                            ${result.ok ? 
+                                `<p class="text-green-700 font-medium">Status: ${result.status} ${result.statusText}</p>` :
+                                `<p class="text-red-700 font-medium">Error: ${result.error || `${result.status} ${result.statusText}`}</p>`
+                            }
+                            ${result.data ? `<pre class="mt-2 text-xs bg-gray-100 p-2 rounded">${JSON.stringify(result.data, null, 2)}</pre>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add to top of results
+            resultsDiv.insertAdjacentHTML('afterbegin', resultHtml);
+        }
+        
+        function displaySummary(working, total) {
+            const resultsDiv = document.getElementById('testResults');
+            
+            const summaryHtml = `
+                <div class="border-2 border-blue-500 bg-blue-50 p-4 rounded-lg">
+                    <div class="text-center">
+                        <h3 class="font-semibold text-lg text-blue-700">📊 Test Summary</h3>
+                        <p class="text-blue-600">${working} out of ${total} APIs working</p>
+                        <p class="text-sm text-blue-500">${working === total ? '🎉 All APIs are working!' : '⚠️ Some APIs need attention'}</p>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.insertAdjacentHTML('afterbegin', summaryHtml);
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testAllAPIs();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
