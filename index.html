@@ -1276,32 +1276,50 @@ Keep the question under 50 words and be warm and professional.`;
                 }
                 
                 const result = await response.json();
-                console.log('✅ PDF parsed successfully:', result);
+                console.log('📄 PDF processing result:', result);
                 
-                // Store the parsed content
-                uploadedFileContents.push({ 
-                    name: file.name, 
-                    type: file.type, 
-                    content: result.textContent,
-                    pages: result.pages,
-                    textLength: result.textLength
-                });
-                
-                // Update UI
-                fileItem.querySelector('.file-status').textContent = `✓ Parsed (${result.pages} pages)`;
-                fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-green-600');
+                if (result.success) {
+                    // Store the parsed content
+                    uploadedFileContents.push({ 
+                        name: file.name, 
+                        type: file.type, 
+                        content: result.textContent,
+                        pages: result.pages || 0,
+                        textLength: result.textLength || 0
+                    });
+                    
+                    // Update UI based on success
+                    if (result.textLength > 0) {
+                        fileItem.querySelector('.file-status').textContent = `✓ Parsed (${result.pages} pages)`;
+                        fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-green-600');
+                    } else {
+                        fileItem.querySelector('.file-status').textContent = '⚠ No text found';
+                        fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-orange-600');
+                    }
+                } else {
+                    // PDF upload succeeded but parsing failed
+                    uploadedFileContents.push({ 
+                        name: file.name, 
+                        type: file.type, 
+                        content: result.textContent || `[PDF received: ${file.name} - parsing not available]`
+                    });
+                    
+                    fileItem.querySelector('.file-status').textContent = '⚠ Upload OK, parse failed';
+                    fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-orange-600');
+                }
                 
             } catch (error) {
                 console.error('❌ Error uploading PDF:', error);
-                fileItem.querySelector('.file-status').textContent = '✗ Parse Error';
-                fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-red-600');
                 
-                // Still add the file but with error message
+                // Still add the file with fallback content
                 uploadedFileContents.push({ 
                     name: file.name, 
                     type: file.type, 
-                    content: `[PDF parsing failed: ${error.message}]` 
+                    content: `[PDF file: ${file.name} - upload failed but filename recorded for interview context]` 
                 });
+                
+                fileItem.querySelector('.file-status').textContent = '✗ Upload failed';
+                fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-red-600');
             }
         }
 

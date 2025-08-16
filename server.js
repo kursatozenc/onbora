@@ -52,43 +52,97 @@ app.post('/api/upload-pdf', upload.single('pdf'), async (req, res) => {
     // Read the uploaded PDF file
     const pdfBuffer = fs.readFileSync(req.file.path);
     
-    // Parse the PDF content using pdfjs-dist
-    const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
-    const loadingTask = pdfjs.getDocument({ data: new Uint8Array(pdfBuffer) });
-    const pdfDoc = await loadingTask.promise;
-    
-    let fullText = '';
-    const numPages = pdfDoc.numPages;
-    
-    // Extract text from each page
-    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-      const page = await pdfDoc.getPage(pageNum);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items.map(item => item.str).join(' ');
-      fullText += pageText + '\n';
+    try {
+      // Parse the PDF content using pdfjs-dist with better error handling
+      const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+      
+      // Configure pdfjs for serverless environment
+      pdfjs.GlobalWorkerOptions.workerSrc = null;
+      
+      const loadingTask = pdfjs.getDocument({ 
+        data: new Uint8Array(pdfBuffer),
+        verbosity: 0 // Reduce logging
+      });
+      
+      const pdfDoc = await loadingTask.promise;
+      
+      let fullText = '';
+      const numPages = pdfDoc.numPages;
+      
+      console.log(`📄 Processing ${numPages} pages...`);
+      
+      // Extract text from each page
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        try {
+          const page = await pdfDoc.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .filter(item => item.str && typeof item.str === 'string')
+            .map(item => item.str.trim())
+            .filter(text => text.length > 0)
+            .join(' ');
+          
+          if (pageText) {
+            fullText += pageText + '\n';
+          }
+          
+          console.log(`✅ Processed page ${pageNum}/${numPages}`);
+        } catch (pageError) {
+          console.warn(`⚠️ Error processing page ${pageNum}:`, pageError.message);
+          // Continue with other pages
+        }
+      }
+      
+      const extractedText = fullText.trim();
+      
+      // Clean up the uploaded file
+      fs.unlinkSync(req.file.path);
+      
+      if (extractedText.length === 0) {
+        return res.status(200).json({
+          success: true,
+          filename: req.file.originalname,
+          textContent: '[PDF processed but no readable text found - may be image-based PDF]',
+          pages: numPages,
+          textLength: 0,
+          message: 'PDF processed but contained no extractable text'
+        });
+      }
+      
+      console.log('✅ PDF parsed successfully');
+      console.log('📊 Text length:', extractedText.length);
+      console.log('📊 Pages:', numPages);
+      
+      // Return the parsed content
+      res.status(200).json({
+        success: true,
+        filename: req.file.originalname,
+        textContent: extractedText,
+        pages: numPages,
+        textLength: extractedText.length,
+        message: 'PDF parsed successfully'
+      });
+      
+    } catch (pdfError) {
+      console.error('❌ PDF parsing error:', pdfError);
+      
+      // Clean up the uploaded file
+      fs.unlinkSync(req.file.path);
+      
+      // Return a graceful fallback response
+      return res.status(200).json({
+        success: false,
+        filename: req.file.originalname,
+        textContent: `[PDF upload received: ${req.file.originalname} - Text extraction failed but file was processed]`,
+        pages: 0,
+        textLength: 0,
+        message: 'PDF received but text extraction failed',
+        error: 'PDF parsing not available in this environment'
+      });
     }
     
-    const extractedText = fullText.trim();
-    
-    // Clean up the uploaded file
-    fs.unlinkSync(req.file.path);
-    
-    console.log('✅ PDF parsed successfully');
-    console.log('📊 Text length:', extractedText.length);
-    console.log('📊 Pages:', numPages);
-    
-    // Return the parsed content
-    res.status(200).json({
-      success: true,
-      filename: req.file.originalname,
-      textContent: extractedText,
-      pages: numPages,
-      textLength: extractedText.length,
-      message: 'PDF parsed successfully'
-    });
-    
   } catch (error) {
-    console.error('❌ Error parsing PDF:', error);
+    console.error('❌ Error in PDF upload:', error);
     
     // Clean up file if it exists
     if (req.file && req.file.path) {
@@ -100,7 +154,7 @@ app.post('/api/upload-pdf', upload.single('pdf'), async (req, res) => {
     }
     
     res.status(500).json({ 
-      error: 'Failed to parse PDF',
+      error: 'Failed to process PDF upload',
       details: error.message 
     });
   }
