@@ -1,0 +1,13 @@
+This is a simple test document for the Onbora application.
+
+Company Values:
+- Innovation
+- Collaboration  
+- Excellence
+
+Work Policies:
+- Remote work is encouraged
+- Flexible hours
+- Weekly team meetings
+
+This document should be parsed successfully by the application.
