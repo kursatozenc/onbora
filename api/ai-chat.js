@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       headers: req.headers
     });
     
-    const { message, agentType, companyContext, isSmartMode } = req.body;
+    const { message, agentType, companyContext, conversationHistory, isSmartMode } = req.body;
 
     if (!message) {
       console.log('❌ No message provided');
@@ -59,6 +59,20 @@ export default async function handler(req, res) {
     // Build comprehensive company knowledge base
     const companyKnowledge = buildCompanyKnowledge(companyContext);
     
+    // Build conversation history context
+    let conversationContext = '';
+    let hasConversationHistory = false;
+    
+    if (conversationHistory && conversationHistory.length > 1) {
+      // We have previous conversation (more than just the current message)
+      hasConversationHistory = true;
+      
+      // Get all previous messages (excluding the current user message we're responding to)
+      const previousMessages = conversationHistory.slice(0, -1);
+      conversationContext = '\n\nCONVERSATION HISTORY:\n' + 
+        previousMessages.map(msg => `${msg.role === 'user' ? 'User' : agent.name}: ${msg.message}`).join('\n');
+    }
+    
     const systemPrompt = `
       ${agent.context}
       
@@ -74,6 +88,9 @@ export default async function handler(req, res) {
       - If you don't have specific info, acknowledge it and suggest alternatives
       - Maintain your warm, professional personality as ${agent.name}
       - Focus on ${agent.focus} while being helpful with other topics
+      ${hasConversationHistory ? 
+        "- Continue the conversation naturally - NO greetings, welcomes, or introductions since we're already talking" : 
+        "- Start with a warm greeting since this is your first message to this user"}
       
       Respond as ${agent.name}, the ${agent.role} for ${companyContext?.name || 'this company'}.
     `;
@@ -84,7 +101,7 @@ export default async function handler(req, res) {
           role: "user",
           parts: [
             {
-              text: systemPrompt + "\n\nUser message: " + message
+              text: systemPrompt + conversationContext + "\n\nUser message: " + message
             }
           ]
         }

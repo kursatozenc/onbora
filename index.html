@@ -1352,6 +1352,24 @@ Keep the question under 50 words and be warm and professional.`;
                 const documentInsights = window.documentInsights || {};
                 const previousAnswers = window.interviewAnswers || [];
                 
+                // Check if interview is complete BEFORE making the API call
+                console.log('🔍 Interview completion check:', {
+                    interviewQuestionIndex,
+                    isComplete: interviewQuestionIndex >= 2,
+                    answersCount: previousAnswers.length
+                });
+                
+                if (interviewQuestionIndex >= 2) { // 3 questions total (0-2), this is the 3rd answer
+                    console.log('✅ Interview complete! Auto-advancing to summary...');
+                    // Interview complete - auto-advance immediately
+                    addInterviewMessage("Perfect! I've captured everything I need to create your personalized onboarding agents. Let me prepare your summary...", false);
+                    setTimeout(() => {
+                        console.log('🎯 Showing interview summary');
+                        showInterviewSummary();
+                    }, 2000);
+                    return; // Exit early, no more questions needed
+                }
+                
                 // Prepare context for the AI interviewer
                 const interviewContext = {
                     companyName: document.getElementById('companyName').value || 'Your Company',
@@ -1360,7 +1378,7 @@ Keep the question under 50 words and be warm and professional.`;
                     previousAnswers: previousAnswers,
                     documentInsights: documentInsights,
                     currentQuestion: interviewQuestionIndex + 1,
-                    totalQuestions: 7
+                    totalQuestions: 3
                 };
 
                 // Create smart prompt based on what we already know
@@ -1381,12 +1399,7 @@ Keep the question under 50 words and be warm and professional.`;
                 User just said: "${message}"
                 
                 YOUR TASK:
-                ${interviewContext.currentQuestion >= 2 ? 
-                    'This is the FINAL question. Thank them and mention the interview is complete.' :
-                    'Ask your next intelligent follow-up question that:'
-                }
-                
-                ${interviewContext.currentQuestion < 2 ? `
+                Ask your next intelligent follow-up question that:
                 1. Builds naturally on their response
                 2. Focuses on the BIGGEST gap from document analysis
                 3. Will help create better AI agents for new hires
@@ -1394,7 +1407,6 @@ Keep the question under 50 words and be warm and professional.`;
                 5. Is conversational and engaging
                 
                 Prioritize asking about: ${getPriorityTopics(documentInsights)}
-                ` : ''}
                 
                 Keep response under 60 words. Be warm and professional.`;
 
@@ -1415,30 +1427,11 @@ Keep the question under 50 words and be warm and professional.`;
 
                 const data = await response.json();
                 
-                // Add AI response first
+                // Add AI response and increment question index
                 addInterviewMessage(data.response, false);
+                interviewQuestionIndex++;
                 
-                // Check if interview is complete (after 3 questions answered)
-                console.log('🔍 Interview completion check:', {
-                    interviewQuestionIndex,
-                    isComplete: interviewQuestionIndex >= 2
-                });
-                
-                if (interviewQuestionIndex >= 2) { // 3 questions total (0-2), this is the 3rd answer
-                    console.log('✅ Interview complete! Auto-advancing to summary...');
-                    // Interview complete - auto-advance after a brief pause
-                    setTimeout(() => {
-                        addInterviewMessage("Perfect! I've captured everything I need to create your personalized onboarding agents. Let me prepare your summary...", false);
-                        setTimeout(() => {
-                            console.log('🎯 Showing interview summary');
-                            showInterviewSummary();
-                        }, 1500);
-                    }, 1000);
-                } else {
-                    console.log('➡️ Continuing to next question. Index will be:', interviewQuestionIndex + 1);
-                    // Continue to next question
-                    interviewQuestionIndex++;
-                }
+                console.log('➡️ Moving to next question. Index is now:', interviewQuestionIndex);
                 
             } catch (error) {
                 // Remove typing indicator
@@ -1450,7 +1443,10 @@ Keep the question under 50 words and be warm and professional.`;
                     addInterviewMessage(interviewQuestions[interviewQuestionIndex], false);
                     interviewQuestionIndex++;
                 } else {
-                    showInterviewSummary();
+                    addInterviewMessage("Thank you for the interview! Let me prepare your summary...", false);
+                    setTimeout(() => {
+                        showInterviewSummary();
+                    }, 2000);
                 }
             }
         }
@@ -1564,14 +1560,16 @@ Keep the question under 50 words and be warm and professional.`;
             // Clear chat messages when switching agents
             document.getElementById('chatMessages').innerHTML = '';
             
+            // Initialize conversation history for this agent if it doesn't exist
+            if (!conversationHistory[agentId]) {
+                conversationHistory[agentId] = [];
+            }
+            
             // Only add greeting message if this is the first time talking to this agent
-            if (!conversationHistory[agentId] || conversationHistory[agentId].length === 0) {
+            if (conversationHistory[agentId].length === 0) {
                 addChatMessage(agent.greeting, false);
                 
-                // Initialize conversation history with greeting
-                if (!conversationHistory[agentId]) {
-                    conversationHistory[agentId] = [];
-                }
+                // Add greeting to conversation history
                 conversationHistory[agentId].push({
                     role: 'assistant',
                     message: agent.greeting

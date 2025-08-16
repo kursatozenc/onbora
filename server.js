@@ -164,8 +164,13 @@ app.post('/api/ai-chat', async (req, res) => {
     
     // Build conversation history context
     let conversationContext = '';
+    let hasConversationHistory = false;
+    
     if (conversationHistory && conversationHistory.length > 1) {
-      // Skip first message since that will be the current one
+      // We have previous conversation (more than just the current message)
+      hasConversationHistory = true;
+      
+      // Get all previous messages (excluding the current user message we're responding to)
       const previousMessages = conversationHistory.slice(0, -1);
       conversationContext = '\n\nCONVERSATION HISTORY:\n' + 
         previousMessages.map(msg => `${msg.role === 'user' ? 'User' : agent.name}: ${msg.message}`).join('\n');
@@ -186,7 +191,9 @@ app.post('/api/ai-chat', async (req, res) => {
       - If you don't have specific info, acknowledge it and suggest alternatives
       - Maintain your warm, professional personality as ${agent.name}
       - Focus on ${agent.focus} while being helpful with other topics
-      ${conversationHistory && conversationHistory.length > 1 ? "- Continue the conversation naturally (don't restart with greetings)" : "- Start with a warm greeting since this is your first message"}
+      ${hasConversationHistory ? 
+        "- Continue the conversation naturally - NO greetings, welcomes, or introductions since we're already talking" : 
+        "- Start with a warm greeting since this is your first message to this user"}
       
       Respond as ${agent.name}, the ${agent.role} for ${companyContext?.name || 'this company'}.
     `;
