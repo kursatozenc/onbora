@@ -1,0 +1,7 @@
+server.js
+test-*.js
+test-*.html
+uploads/
+.env.local
+node_modules/
+*.log
