@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct API Test - Onbora</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        .loading { color: #856404; background-color: #fff3cd; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Direct API Test - Onbora</h1>
+    
+    <div>
+        <button onclick="testHello()">Test /api/hello</button>
+        <button onclick="testGemini()">Test /api/gemini</button>
+        <button onclick="testAIChat()">Test /api/ai-chat</button>
+        <button onclick="testAll()">Test All APIs</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        const baseUrl = 'https://onbora-omega.vercel.app';
+        
+        function addResult(message, isSuccess = true) {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        function addLoading(message) {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = 'test-result loading';
+            div.innerHTML = message;
+            resultsDiv.appendChild(div);
+            return div;
+        }
+        
+        async function testEndpoint(endpoint, testData = {}) {
+            const url = `${baseUrl}/api/${endpoint}`;
+            const loadingDiv = addLoading(`Testing ${endpoint}...`);
+            
+            try {
+                console.log(`Testing ${endpoint} at: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                loadingDiv.remove();
+                
+                if (response.ok) {
+                    try {
+                        const data = await response.json();
+                        addResult(`✅ ${endpoint}: SUCCESS (${response.status})<br>Response: ${JSON.stringify(data, null, 2)}`);
+                    } catch (e) {
+                        addResult(`✅ ${endpoint}: SUCCESS (${response.status})<br>Response: Not JSON`);
+                    }
+                } else {
+                    addResult(`❌ ${endpoint}: FAILED (${response.status} ${response.statusText})<br>URL: ${url}`);
+                }
+                
+                return response.ok;
+            } catch (error) {
+                loadingDiv.remove();
+                addResult(`❌ ${endpoint}: ERROR<br>${error.message}<br>URL: ${url}`);
+                return false;
+            }
+        }
+        
+        async function testHello() {
+            await testEndpoint('hello', { message: 'test' });
+        }
+        
+        async function testGemini() {
+            await testEndpoint('gemini', { 
+                prompt: 'Hello, this is a test message',
+                systemPrompt: 'You are a helpful assistant.'
+            });
+        }
+        
+        async function testAIChat() {
+            await testEndpoint('ai-chat', { 
+                message: 'Hello, this is a test',
+                companyContext: { name: 'Test Company' }
+            });
+        }
+        
+        async function testAll() {
+            addResult('🚀 Starting comprehensive API test...');
+            
+            const results = [];
+            results.push(await testEndpoint('hello', { message: 'test' }));
+            results.push(await testEndpoint('gemini', { 
+                prompt: 'Hello, this is a test message',
+                systemPrompt: 'You are a helpful assistant.'
+            }));
+            results.push(await testEndpoint('ai-chat', { 
+                message: 'Hello, this is a test',
+                companyContext: { name: 'Test Company' }
+            }));
+            
+            const working = results.filter(r => r).length;
+            const total = results.length;
+            
+            addResult(`📊 Test Summary: ${working} out of ${total} APIs working`);
+            
+            if (working === total) {
+                addResult('🎉 All APIs are working! Your Gemini integration should be functional!');
+            } else {
+                addResult('⚠️ Some APIs need attention. Check the individual test results above.');
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            addResult('🔍 API Test Page Loaded. Click buttons above to test endpoints.');
+        });
+    </script>
+</body>
+</html>
