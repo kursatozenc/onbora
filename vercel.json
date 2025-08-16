@@ -1,4 +1,6 @@
 {
+  "buildCommand": "echo 'Static build - no build step required'",
+  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/(.*)",
