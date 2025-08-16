@@ -27,9 +27,9 @@
                     <span class="text-xl font-bold">Onbora</span>
                 </div>
                 <div class="flex items-center space-x-8">
-                    <button class="text-gray-600 hover:text-black transition">Features</button>
-                    <button class="text-gray-600 hover:text-black transition">How it Works</button>
-                    <button class="text-gray-600 hover:text-black transition">Pricing</button>
+                    <button onclick="scrollToSection('features')" class="text-gray-600 hover:text-black transition">Features</button>
+                    <button onclick="scrollToSection('how-it-works')" class="text-gray-600 hover:text-black transition">How it Works</button>
+                    <button onclick="scrollToSection('pricing')" class="text-gray-600 hover:text-black transition">Pricing</button>
                     <button 
                         onclick="showView('setup')"
                         class="bg-black text-white px-6 py-2.5 rounded-full hover:bg-gray-800 transition"
@@ -54,7 +54,7 @@
                             onclick="showView('setup')"
                             class="bg-black text-white px-8 py-4 rounded-full text-lg hover:bg-gray-800 transition"
                         >
-                            Start Free Trial
+                            Get Started
                         </button>
                         <button 
                             onclick="showView('employee')"
@@ -67,7 +67,7 @@
             </section>
 
             <!-- How it Works Section -->
-            <section class="bg-gray-50 py-20">
+            <section id="how-it-works" class="bg-gray-50 py-20">
                 <div class="max-w-6xl mx-auto px-8">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl font-bold mb-4">How Onbora Works</h2>
@@ -168,7 +168,7 @@
             </section>
 
             <!-- Features Section -->
-            <section class="bg-gray-50 py-20">
+            <section id="features" class="bg-gray-50 py-20">
                 <div class="max-w-6xl mx-auto px-8">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl font-bold mb-4">Powerful Features</h2>
@@ -247,7 +247,7 @@
                             onclick="showView('setup')"
                             class="bg-black text-white px-8 py-4 rounded-full text-lg hover:bg-gray-800 transition"
                         >
-                            Start Free Trial
+                            Get Started
                         </button>
                         <button 
                             onclick="showView('employee')"
@@ -255,6 +255,139 @@
                         >
                             See Demo
                         </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pricing Section -->
+            <section id="pricing" class="py-20">
+                <div class="max-w-6xl mx-auto px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
+                        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                            Choose the plan that fits your team size and needs
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        <!-- Free Trial -->
+                        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold mb-4">Free Trial</h3>
+                                <div class="text-4xl font-bold mb-2">$0</div>
+                                <p class="text-gray-600 mb-6">14 days free</p>
+                                <ul class="text-left space-y-3 mb-8">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Up to 5 new hires</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">All 4 AI agents</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Document analysis</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Basic customization</span>
+                                    </li>
+                                </ul>
+                                <button 
+                                    onclick="showView('setup')"
+                                    class="w-full bg-gray-100 text-gray-800 py-3 rounded-xl hover:bg-gray-200 transition"
+                                >
+                                    Start Free Trial
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Starter Plan -->
+                        <div class="bg-white rounded-2xl p-8 shadow-sm border-2 border-black relative">
+                            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                                <span class="bg-black text-white px-4 py-1 rounded-full text-sm font-medium">Most Popular</span>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold mb-4">Starter</h3>
+                                <div class="text-4xl font-bold mb-2">$49</div>
+                                <p class="text-gray-600 mb-6">per month</p>
+                                <ul class="text-left space-y-3 mb-8">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Up to 25 new hires/month</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">All 4 AI agents</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Advanced document analysis</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Full customization</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Email support</span>
+                                    </li>
+                                </ul>
+                                <button 
+                                    onclick="showView('setup')"
+                                    class="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition"
+                                >
+                                    Get Started
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Growth Plan -->
+                        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold mb-4">Growth</h3>
+                                <div class="text-4xl font-bold mb-2">$149</div>
+                                <p class="text-gray-600 mb-6">per month</p>
+                                <ul class="text-left space-y-3 mb-8">
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Unlimited new hires</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">All 4 AI agents</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Premium AI features</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">White-label options</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Priority support</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <span class="text-green-500 mt-1">✓</span>
+                                        <span class="text-sm">Analytics & insights</span>
+                                    </li>
+                                </ul>
+                                <button 
+                                    onclick="showView('setup')"
+                                    class="w-full bg-gray-100 text-gray-800 py-3 rounded-xl hover:bg-gray-200 transition"
+                                >
+                                    Contact Sales
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-12">
+                        <p class="text-gray-600 mb-4">All plans include 14-day free trial • No setup fees • Cancel anytime</p>
+                        <p class="text-sm text-gray-500">Need a custom plan? <a href="#" class="text-black underline">Contact our sales team</a></p>
                     </div>
                 </div>
             </section>
@@ -331,16 +464,15 @@
                         Upload your employee handbook, policies, or any other documents that new hires should know about. (e.g., .txt, .md, .pdf)
                     </p>
                     
-                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition hover:bg-gray-50" 
-                         onclick="console.log('🔍 Drop zone clicked'); const fileInput = document.getElementById('fileInput'); console.log('🔍 File input element:', fileInput); if(fileInput) fileInput.click(); else console.error('❌ File input not found!');"
+                    <label for="mainFileInput" id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition hover:bg-gray-50 block"
                          ondragover="event.preventDefault(); this.classList.add('border-blue-400', 'bg-blue-50');"
                          ondragleave="this.classList.remove('border-blue-400', 'bg-blue-50');"
                          ondrop="console.log('🔍 Files dropped on drop zone'); event.preventDefault(); event.stopPropagation(); this.classList.remove('border-blue-400', 'bg-blue-50'); handleFileUpload(event.dataTransfer.files);">
                         <div class="text-4xl mb-4">📄</div>
                         <p class="text-gray-600 mb-2">Drag & drop files here, or click to browse</p>
                         <p class="text-sm text-gray-500">AI will analyze text-based files to fuel the interview.</p>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.md" class="hidden" onchange="console.log('🔍 File input changed'); handleFileUpload(this.files);">
-                    </div>
+                        <input type="file" id="mainFileInput" multiple accept=".pdf,.doc,.docx,.txt,.md" style="display: none;" onchange="console.log('🔍 Main file input changed'); handleFileUpload(this.files);">
+                    </label>
 
                     <div id="fileList" class="mt-4 space-y-2"></div>
                     
@@ -671,6 +803,7 @@
         let uploadedFileContents = [];
         let currentAgent = 'maya';
         let interviewQuestionIndex = 0;
+        let conversationHistory = {}; // Track conversation history for each agent
         
         // Initialize document insights to prevent undefined errors
         window.documentInsights = {};
@@ -733,25 +866,15 @@
         
         function setupFileUploadHandlers() {
             const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
+            const fileInput = document.getElementById('mainFileInput');
             
             console.log('🔍 Setting up file upload handlers');
             console.log('🔍 Drop zone:', dropZone);
             console.log('🔍 File input:', fileInput);
             
-            if (dropZone && !dropZone.hasAttribute('data-handlers-added')) {
-                dropZone.addEventListener('click', function() {
-                    console.log('🔍 Drop zone clicked via addEventListener');
-                    if (fileInput) {
-                        console.log('🔍 Triggering file input click');
-                        fileInput.click();
-                    } else {
-                        console.error('❌ File input element not found!');
-                    }
-                });
-                dropZone.setAttribute('data-handlers-added', 'true');
-                console.log('✅ Drop zone click handler added');
-            }
+            // Since we're using a label approach, we don't need the click handler anymore
+            // The label automatically handles clicks to trigger the file input
+            console.log('✅ File upload using label approach - no additional handlers needed');
         }
 
         function nextStep(step) {
@@ -1106,7 +1229,10 @@ Keep the question under 50 words and be warm and professional.`;
                 fileList.appendChild(fileItem);
 
                 const isReadableText = file.type.startsWith('text/') || /\.(txt|md)$/i.test(file.name);
+                const isPDF = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+                
                 if (isReadableText) {
+                    // Handle text files as before
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const content = String(e.target.result || '').slice(0, 8000);
@@ -1119,7 +1245,11 @@ Keep the question under 50 words and be warm and professional.`;
                         fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-red-600');
                     };
                     reader.readAsText(file);
+                } else if (isPDF) {
+                    // Handle PDF files with our new parsing endpoint
+                    uploadPDFFile(file, fileItem);
                 } else {
+                    // Handle other file types as before
                     uploadedFileContents.push({ name: file.name, type: file.type, content: `[File type (${file.type}) not readable in browser]` });
                     fileItem.querySelector('.file-status').textContent = '✓ Added';
                     fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-gray-500');
@@ -1127,6 +1257,52 @@ Keep the question under 50 words and be warm and professional.`;
             }
             
             document.getElementById('fileInput').value = '';
+        }
+
+        async function uploadPDFFile(file, fileItem) {
+            try {
+                console.log('📄 Uploading PDF:', file.name);
+                
+                const formData = new FormData();
+                formData.append('pdf', file);
+                
+                const response = await fetch('/api/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ PDF parsed successfully:', result);
+                
+                // Store the parsed content
+                uploadedFileContents.push({ 
+                    name: file.name, 
+                    type: file.type, 
+                    content: result.textContent,
+                    pages: result.pages,
+                    textLength: result.textLength
+                });
+                
+                // Update UI
+                fileItem.querySelector('.file-status').textContent = `✓ Parsed (${result.pages} pages)`;
+                fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-green-600');
+                
+            } catch (error) {
+                console.error('❌ Error uploading PDF:', error);
+                fileItem.querySelector('.file-status').textContent = '✗ Parse Error';
+                fileItem.querySelector('.file-status').classList.replace('text-blue-600', 'text-red-600');
+                
+                // Still add the file but with error message
+                uploadedFileContents.push({ 
+                    name: file.name, 
+                    type: file.type, 
+                    content: `[PDF parsing failed: ${error.message}]` 
+                });
+            }
         }
 
         function submitInterview() {
@@ -1239,16 +1415,28 @@ Keep the question under 50 words and be warm and professional.`;
 
                 const data = await response.json();
                 
-                // Check if interview is complete
-                if (interviewQuestionIndex >= 2) { // 3 questions total (0-2)
-                    // Interview complete - show completion message then auto-advance
-                    addInterviewMessage("Perfect! I've captured everything I need to create your personalized onboarding agents. Let me prepare your summary...", false);
+                // Add AI response first
+                addInterviewMessage(data.response, false);
+                
+                // Check if interview is complete (after 3 questions answered)
+                console.log('🔍 Interview completion check:', {
+                    interviewQuestionIndex,
+                    isComplete: interviewQuestionIndex >= 2
+                });
+                
+                if (interviewQuestionIndex >= 2) { // 3 questions total (0-2), this is the 3rd answer
+                    console.log('✅ Interview complete! Auto-advancing to summary...');
+                    // Interview complete - auto-advance after a brief pause
                     setTimeout(() => {
-                        showInterviewSummary();
-                    }, 1500);
+                        addInterviewMessage("Perfect! I've captured everything I need to create your personalized onboarding agents. Let me prepare your summary...", false);
+                        setTimeout(() => {
+                            console.log('🎯 Showing interview summary');
+                            showInterviewSummary();
+                        }, 1500);
+                    }, 1000);
                 } else {
-                    // Add AI response and continue
-                    addInterviewMessage(data.response, false);
+                    console.log('➡️ Continuing to next question. Index will be:', interviewQuestionIndex + 1);
+                    // Continue to next question
                     interviewQuestionIndex++;
                 }
                 
@@ -1373,8 +1561,27 @@ Keep the question under 50 words and be warm and professional.`;
             });
             document.querySelector(`[data-agent="${agentId}"]`).classList.add('bg-blue-50', 'border-blue-200');
             
-            // Add agent greeting message
-            addChatMessage(agent.greeting, false);
+            // Clear chat messages when switching agents
+            document.getElementById('chatMessages').innerHTML = '';
+            
+            // Only add greeting message if this is the first time talking to this agent
+            if (!conversationHistory[agentId] || conversationHistory[agentId].length === 0) {
+                addChatMessage(agent.greeting, false);
+                
+                // Initialize conversation history with greeting
+                if (!conversationHistory[agentId]) {
+                    conversationHistory[agentId] = [];
+                }
+                conversationHistory[agentId].push({
+                    role: 'assistant',
+                    message: agent.greeting
+                });
+            } else {
+                // Restore conversation history for this agent
+                conversationHistory[agentId].forEach(msg => {
+                    addChatMessage(msg.message, msg.role === 'user');
+                });
+            }
         }
 
         function sendMessage() {
@@ -1416,6 +1623,17 @@ Keep the question under 50 words and be warm and professional.`;
                 const typingIndicator = document.getElementById('typingIndicator');
                 if (typingIndicator) typingIndicator.remove();
 
+                // Initialize conversation history for this agent if it doesn't exist
+                if (!conversationHistory[agentId]) {
+                    conversationHistory[agentId] = [];
+                }
+
+                // Add current user message to conversation history
+                conversationHistory[agentId].push({
+                    role: 'user',
+                    message: message
+                });
+
                 // Prepare comprehensive context for the AI
                 const companyContext = {
                     name: document.getElementById('companyName').value || 'Your Company',
@@ -1436,6 +1654,7 @@ Keep the question under 50 words and be warm and professional.`;
                     message: message,
                     agentType: agentId,
                     companyContext: companyContext,
+                    conversationHistory: conversationHistory[agentId],
                     isSmartMode: true
                 };
 
@@ -1461,7 +1680,13 @@ Keep the question under 50 words and be warm and professional.`;
                 const data = await response.json();
                 console.log('✅ API Response data:', data);
                 
-                // Add AI response
+                // Add AI response to conversation history
+                conversationHistory[agentId].push({
+                    role: 'assistant',
+                    message: data.response
+                });
+                
+                // Add AI response to UI
                 addChatMessage(data.response, false);
                 
             } catch (error) {
@@ -1582,6 +1807,17 @@ The ${companyName} Team`;
             
             // Send the message
             sendMessage();
+        }
+
+        // Smooth scroll to section
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         }
 
         // Initialize the app

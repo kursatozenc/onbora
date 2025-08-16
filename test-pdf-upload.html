@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PDF Upload and Parsing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8">📄 Test PDF Upload and Parsing</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Upload PDF Document</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select PDF File:</label>
+                    <input type="file" id="pdfFile" accept=".pdf" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <button onclick="uploadPDF()" 
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                    🚀 Upload and Parse PDF
+                </button>
+            </div>
+        </div>
+        
+        <div id="result" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <h3 class="text-lg font-semibold mb-3">Parsing Result:</h3>
+            <div id="resultContent"></div>
+        </div>
+        
+        <div id="parsedContent" class="bg-white rounded-lg shadow-md p-6 hidden">
+            <h3 class="text-lg font-semibold mb-3">Extracted Text Content:</h3>
+            <div id="contentDisplay"></div>
+        </div>
+        
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 class="font-semibold text-yellow-800 mb-2">ℹ️ How to test:</h3>
+            <ol class="text-sm text-yellow-700 space-y-1">
+                <li>1. Select a PDF file (employee handbook, policies, etc.)</li>
+                <li>2. Click "Upload and Parse PDF"</li>
+                <li>3. View the extracted text content</li>
+                <li>4. Test the AI agents with the parsed content</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function uploadPDF() {
+            const fileInput = document.getElementById('pdfFile');
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const parsedContentDiv = document.getElementById('parsedContent');
+            const contentDisplay = document.getElementById('contentDisplay');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a PDF file');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            if (file.type !== 'application/pdf') {
+                alert('Please select a PDF file');
+                return;
+            }
+            
+            resultDiv.classList.remove('hidden');
+            resultContent.innerHTML = '<div class="text-gray-600">Uploading and parsing PDF...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('pdf', file);
+                
+                const response = await fetch('/api/upload-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultContent.innerHTML = `
+                        <div class="text-green-700 font-medium">✅ PDF Parsed Successfully!</div>
+                        <div class="mt-2 p-3 bg-gray-100 rounded text-sm">
+                            <strong>Filename:</strong> ${data.filename}<br>
+                            <strong>Pages:</strong> ${data.pages}<br>
+                            <strong>Text Length:</strong> ${data.textLength} characters
+                        </div>
+                    `;
+                    
+                    // Display parsed content
+                    parsedContentDiv.classList.remove('hidden');
+                    const truncatedContent = data.textContent.length > 2000 
+                        ? data.textContent.substring(0, 2000) + '...' 
+                        : data.textContent;
+                    
+                    contentDisplay.innerHTML = `
+                        <div class="bg-gray-50 p-4 rounded border text-sm font-mono whitespace-pre-wrap max-h-96 overflow-y-auto">
+                            ${truncatedContent}
+                        </div>
+                        <div class="mt-2 text-sm text-gray-600">
+                            ${data.textContent.length > 2000 ? `Showing first 2000 characters of ${data.textContent.length} total` : 'Full content displayed'}
+                        </div>
+                    `;
+                    
+                    // Store the parsed content for testing
+                    window.parsedPDFContent = data.textContent;
+                    window.parsedPDFFilename = data.filename;
+                    
+                } else {
+                    throw new Error('PDF parsing failed');
+                }
+                
+            } catch (error) {
+                console.error('PDF upload error:', error);
+                resultContent.innerHTML = `
+                    <div class="text-red-700 font-medium">❌ PDF Upload/Parsing Failed</div>
+                    <div class="mt-2 p-3 bg-red-50 rounded text-sm">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ To enable AI-powered onboarding agents, you need to set up a Gemini API key:
 
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Create a new API key
-3. Set the environment variable: `GEMINI_API_KEY`
+3. Set the environment variable in your `.env.local` file (see below)
 
 ## Local Development
 
@@ -18,8 +18,10 @@ To enable AI-powered onboarding agents, you need to set up a Gemini API key:
 
 2. Set up environment variables in a `.env.local` file:
    ```
-   GEMINI_API_KEY=your_api_key_here
+   GEMINI_API_KEY=your_actual_api_key_here
    ```
+   
+   **Important**: Replace `your_actual_api_key_here` with your actual Gemini API key. Never commit this file to version control.
 
 3. Run the development server:
    ```bash
