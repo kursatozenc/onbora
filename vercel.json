@@ -1,31 +1,19 @@
 {
   "functions": {
-    "server.js": {
+    "api/upload-pdf.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/gemini.js": {
+      "runtime": "nodejs18.x"  
+    },
+    "api/ai-chat.js": {
       "runtime": "nodejs18.x"
     }
   },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/upload-pdf",
-      "dest": "/api/upload-pdf.js"
-    },
-    {
-      "src": "/api/gemini",
-      "dest": "/api/gemini.js"
-    },
-    {
-      "src": "/api/ai-chat",
-      "dest": "/api/ai-chat.js"
     }
   ]
 }
