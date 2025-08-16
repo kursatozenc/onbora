@@ -1,8 +1,18 @@
 {
   "version": 2,
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
     }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "GEMINI_API_KEY": "@gemini-api-key"
   }
-} 
+}
