@@ -13,6 +13,7 @@
         .hidden { display: none; }
         .chat-message { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes typingDot { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -1640,7 +1641,11 @@ Keep the question under 50 words and be warm and professional.`;
                         <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">${agents[currentAgent].role}</span>
                     </div>
                     <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 mr-12">
-                        <p class="text-gray-800">Typing...</p>
+                        <div class="flex items-center gap-1">
+                            <span class="w-2 h-2 bg-gray-400 rounded-full" style="animation: typingDot 1.4s ease-in-out infinite;"></span>
+                            <span class="w-2 h-2 bg-gray-400 rounded-full" style="animation: typingDot 1.4s ease-in-out 0.2s infinite;"></span>
+                            <span class="w-2 h-2 bg-gray-400 rounded-full" style="animation: typingDot 1.4s ease-in-out 0.4s infinite;"></span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1745,7 +1750,54 @@ Keep the question under 50 words and be warm and professional.`;
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} chat-message`;
-            
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(8px)';
+            messageDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+            // Parse suggestions from AI response
+            let displayText = text;
+            let suggestions = [];
+            if (!isUser && text.includes('SUGGESTIONS:')) {
+                const parts = text.split('SUGGESTIONS:');
+                displayText = parts[0].trim();
+                suggestions = parts[1].trim().split('|').map(s => s.trim()).filter(s => s);
+            }
+
+            // Detect handoff mentions
+            let handoffHtml = '';
+            if (!isUser) {
+                const handoffAgents = {
+                    maya: { pattern: /\bMaya\b.*(?:Welcome Guide|perfect|connect|help)/i, id: 'maya' },
+                    alex: { pattern: /\bAlex\b.*(?:HR|expert|connect|help)/i, id: 'alex' },
+                    jordan: { pattern: /\bJordan\b.*(?:Culture|Guide|knows|connect|help)/i, id: 'jordan' },
+                    sam: { pattern: /\bSam\b.*(?:Tech|Specialist|help|connect)/i, id: 'sam' }
+                };
+
+                Object.entries(handoffAgents).forEach(([key, val]) => {
+                    if (key !== currentAgent && val.pattern.test(displayText)) {
+                        const agent = agents[key];
+                        handoffHtml += `
+                            <button onclick="selectAgent('${key}')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 mt-2 mr-2 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer">
+                                <span>${agent.avatar}</span> Switch to ${agent.name}
+                            </button>
+                        `;
+                    }
+                });
+            }
+
+            // Build suggestion pills
+            let suggestionsHtml = '';
+            if (suggestions.length > 0) {
+                suggestionsHtml = `<div class="flex flex-wrap gap-2 mt-3">` +
+                    suggestions.map(s => `
+                        <button onclick="document.getElementById('chatInput').value='${s.replace(/'/g, "\\'")}'; sendMessage();"
+                            class="text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors cursor-pointer border border-gray-200">
+                            ${s}
+                        </button>
+                    `).join('') + `</div>`;
+            }
+
             messageDiv.innerHTML = `
                 <div class="max-w-lg">
                     ${!isUser ? `
@@ -1755,12 +1807,21 @@ Keep the question under 50 words and be warm and professional.`;
                         </div>
                     ` : ''}
                     <div class="rounded-2xl px-4 py-3 ${isUser ? 'bg-black text-white ml-12' : 'bg-white border border-gray-200 mr-12'}">
-                        <p class="${isUser ? 'text-white' : 'text-gray-800'}">${text}</p>
+                        <p class="${isUser ? 'text-white' : 'text-gray-800'}">${displayText}</p>
+                        ${handoffHtml ? `<div class="mt-2">${handoffHtml}</div>` : ''}
                     </div>
+                    ${suggestionsHtml}
                 </div>
             `;
-            
+
             messagesContainer.appendChild(messageDiv);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0)';
+            });
+
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
