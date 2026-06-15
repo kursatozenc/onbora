@@ -410,7 +410,7 @@ export default function LandingPage() {
         </Reveal>
         <Reveal immediate delay={120}>
           <h1 className="display" style={{ fontSize: 'clamp(46px,7cqw,92px)', margin: '20px auto 0', maxWidth: 920 }}>
-            Every new team member —<br /><span style={{ color: 'var(--pl-coral)' }}>human or AI.</span>
+            Onboarding for everyone.<br /><span style={{ color: 'var(--pl-coral)' }}>Human and AI.</span>
           </h1>
         </Reveal>
         <Reveal immediate delay={240}>
