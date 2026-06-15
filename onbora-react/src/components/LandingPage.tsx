@@ -406,17 +406,19 @@ export default function LandingPage() {
       {/* HERO */}
       <header className="wrap" style={{ paddingTop: 64, paddingBottom: 40, textAlign: 'center' }}>
         <Reveal immediate delay={40}>
-          <p className="kicker" style={{ justifyContent: 'center', display: 'flex' }}>Universal Onboarding Protocol</p>
+          <p className="kicker" style={{ justifyContent: 'center', display: 'flex' }}>Operating context for AI agents</p>
         </Reveal>
         <Reveal immediate delay={120}>
           <h1 className="display" style={{ fontSize: 'clamp(46px,7cqw,92px)', margin: '20px auto 0', maxWidth: 920 }}>
-            Onboarding for everyone.<br /><span style={{ color: 'var(--pl-coral)' }}>Human and AI.</span>
+            Onboard your AI agents<br /><span style={{ color: 'var(--pl-coral)' }}>like teammates.</span>
           </h1>
         </Reveal>
         <Reveal immediate delay={240}>
-          <p className="lead" style={{ maxWidth: 560, margin: '22px auto 0', fontSize: 19 }}>
-            Onbora turns how your team works into one friendly, structured profile — so every new
-            teammate, person or agent, starts on the same page.
+          <p className="lead" style={{ maxWidth: 600, margin: '22px auto 0', fontSize: 19 }}>
+            Onbora captures how your team really works — goals, roles, the unwritten rules — as one
+            structured operating context, then drops it into any agent&apos;s system prompt with a single
+            API call. Your agents arrive knowing the rules nobody wrote down. Built on the same protocol
+            that onboards your people.
           </p>
         </Reveal>
         <Reveal immediate delay={340}>
