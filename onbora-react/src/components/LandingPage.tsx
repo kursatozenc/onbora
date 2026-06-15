@@ -51,7 +51,7 @@ const OCP_SECTIONS = [
 const STEPS = [
   {
     n: 'Step 01', icon: 'mic', t: 'Structured interview',
-    d: "A guided interview based on Hackman's Team Design model surfaces how your team actually operates — direction, roles, norms, the unwritten rules.",
+    d: "A guided interview grounded in team design research surfaces how your team actually operates — direction, roles, norms, the unwritten rules.",
   },
   {
     n: 'Step 02', icon: 'file', t: 'Your OCP is generated',
@@ -387,7 +387,7 @@ function Footer() {
           </div>
         </div>
         <p className="foot__fine">
-          Onbora · the Universal Onboarding Protocol. The OCP schema is grounded in Richard Hackman&apos;s Team Design model.
+          Onbora · the Universal Onboarding Protocol. The OCP schema is grounded in team design research.
         </p>
       </div>
     </footer>
