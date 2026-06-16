@@ -87,7 +87,7 @@ const CHARACTERS: Char[] = [
 const H_CARDS = [
   { blocks: [PL.amber, PL.indigo], t: 'Structured, not tribal', d: "The knowledge that runs your team — written down once, in a consistent schema, instead of living in people's heads.", dark: false },
   { blocks: [PL.teal, PL.coral, PL.mustard], t: 'Portable context', d: "Read the OCP on the web, get it in Slack, or inject it into an agent's system prompt. One profile, every surface.", dark: false },
-  { blocks: [PL.blue, PL.rose], t: 'Living, never stale', d: 'Update the OCP once and every reader — human or AI — re-syncs to the latest version of how your team works.', dark: true },
+  { blocks: [PL.blue, PL.rose], t: 'Living, never stale', d: 'Update the OCP once and every reader — human or AI — re-syncs to the latest version of how your team works.', dark: false },
 ];
 
 // Scenario articulation — grounded in the positioning: agents are the wedge,
