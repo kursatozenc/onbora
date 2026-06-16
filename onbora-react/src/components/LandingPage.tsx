@@ -51,15 +51,15 @@ const OCP_SECTIONS = [
 const STEPS = [
   {
     n: 'Step 01', icon: 'mic', t: 'Structured interview',
-    d: "A guided interview grounded in team design research surfaces how your team actually operates — direction, roles, norms, the unwritten rules.",
+    d: "A short guided interview gets at how your team really runs: its goals, its norms, and the rules no one ever writes down. It's based on team design research, not a generic HR checklist.",
   },
   {
     n: 'Step 02', icon: 'file', t: 'Your OCP is generated',
-    d: 'Onbora compiles the answers into an Onboarding Context Profile: a structured, living document with consistent Team OS sections.',
+    d: 'Onbora turns your answers into an Onboarding Context Profile: one structured document, built the same way for every team.',
   },
   {
     n: 'Step 03', icon: 'deliver', t: 'Delivered anywhere',
-    d: "Read it on the web, receive it in Slack, or inject it straight into an AI agent's system prompt through the API.",
+    d: "Read it on the web, get it in Slack, or send it straight into an agent's system prompt through the API.",
   },
 ];
 
@@ -85,9 +85,9 @@ const CHARACTERS: Char[] = [
 ];
 
 const H_CARDS = [
-  { blocks: [PL.amber, PL.indigo], t: 'Structured, not tribal', d: "The knowledge that runs your team — written down once, in a consistent schema, instead of living in people's heads.", dark: false },
-  { blocks: [PL.teal, PL.coral, PL.mustard], t: 'Portable context', d: "Read the OCP on the web, get it in Slack, or inject it into an agent's system prompt. One profile, every surface.", dark: false },
-  { blocks: [PL.blue, PL.rose], t: 'Living, never stale', d: 'Update the OCP once and every reader — human or AI — re-syncs to the latest version of how your team works.', dark: false },
+  { blocks: [PL.amber, PL.indigo], t: "Out of people's heads", d: "The know-how that runs your team usually lives in a few people's heads. Onbora gets it written down once, in a format every team uses.", dark: false },
+  { blocks: [PL.teal, PL.coral, PL.mustard], t: 'Goes where you need it', d: "Read it on the web, get it in Slack, or send it into an agent's system prompt. It's one profile that works wherever you need it.", dark: false },
+  { blocks: [PL.blue, PL.rose], t: 'Always current', d: "Update it once and everyone re-syncs, whether they're a person or an agent. No more onboarding docs that quietly go out of date.", dark: false },
 ];
 
 // Scenario articulation — grounded in the positioning: agents are the wedge,
@@ -96,25 +96,25 @@ const SCENARIOS = [
   {
     t: 'AI agent', dot: PL.coral,
     rows: [
-      { k: 'Need', v: "An agent joins your stack with zero operating context. Memory tools recall past chats and enterprise search surfaces documents — neither tells it your goals, your norms, or the rules nobody wrote down." },
-      { k: 'Why now', v: "Teams are pushing agents into production today, hand-stuffing system prompts that drift, conflict across agents, and can't be audited. As the model commoditizes, this context becomes the product." },
-      { k: 'Impact', v: "One API call drops your operating context into any agent's system prompt — it acts in-policy from its first task, stays governable and auditable, and re-syncs the moment the rules change." },
+      { k: 'Need', v: "An agent joins your stack knowing nothing about how you work. Memory tools remember past chats and search digs up documents, but neither one tells it how your team actually operates." },
+      { k: 'Why now', v: "Teams are shipping agents into production right now, stuffing context into system prompts by hand. As models turn into a commodity, this context is what sets your agents apart." },
+      { k: 'Impact', v: "One API call loads your operating context into any agent's system prompt. It works by your rules from the first task, and updates itself when those rules change." },
     ],
   },
   {
     t: 'New employee', dot: PL.teal,
     rows: [
-      { k: 'Need', v: 'New hires reverse-engineer the unwritten rules — who to ask, what "done" means, how decisions actually get made — over months.' },
-      { k: 'Why now', v: 'Every slow ramp is weeks of lost output and a shaky start — and the same operating context your agents need is the one that ramps people.' },
-      { k: 'Impact', v: 'They open one structured profile and see how the team really works on day one — ramp measured in days, not quarters.' },
+      { k: 'Need', v: 'New hires spend months working out the unwritten rules: who to ask, what "done" actually means, how decisions really get made.' },
+      { k: 'Why now', v: 'A slow ramp costs weeks of output and a rough first month. And the context your agents need is the same context that gets people up to speed.' },
+      { k: 'Impact', v: 'They open one profile and see how the team really works on day one. Ramp takes days, not months.' },
     ],
   },
   {
     t: 'Internal transfer', dot: PL.mustard,
     rows: [
-      { k: 'Need', v: "Transfers know the company but not the new team's norms, cadence, or who-to-ask." },
-      { k: 'Why now', v: "They're expected to contribute immediately while quietly re-learning context no one hands them." },
-      { k: 'Impact', v: 'They get just the deltas from their last team — norms side by side — and contribute in the first week.' },
+      { k: 'Need', v: "People switching teams already know the company. What they don't know is the new team's rhythm, and who to go to." },
+      { k: 'Why now', v: "Everyone expects them to contribute right away, even though no one actually hands them the context to do it." },
+      { k: 'Impact', v: "They see what's different from their last team and start contributing in the first week." },
     ],
   },
 ];
@@ -436,10 +436,9 @@ export default function LandingPage() {
         </Reveal>
         <Reveal immediate delay={240}>
           <p className="lead" style={{ maxWidth: 600, margin: '22px auto 0', fontSize: 19 }}>
-            Onbora captures how your team really works — goals, roles, the unwritten rules — as one
-            structured operating context, then drops it into any agent&apos;s system prompt with a single
-            API call. Your agents arrive knowing the rules nobody wrote down. Built on the same protocol
-            that onboards your people.
+            Onbora turns how your team actually works into one structured profile, then loads it into any
+            agent&apos;s system prompt with a single API call. Your agents show up already knowing the rules
+            nobody wrote down. It&apos;s the same profile you&apos;d hand a new hire.
           </p>
         </Reveal>
         <Reveal immediate delay={340}>
@@ -459,7 +458,7 @@ export default function LandingPage() {
       <section className="wrap section">
         <Reveal>
           <div style={{ textAlign: 'center', maxWidth: 620, margin: '0 auto 44px' }}>
-            <h2 className="h2">A modern way for teams to onboard.</h2>
+            <h2 className="h2">Why teams use Onbora.</h2>
           </div>
         </Reveal>
         <Reveal delay={120} y={24}>
@@ -484,7 +483,7 @@ export default function LandingPage() {
         <Reveal>
           <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto 44px' }}>
             <p className="kicker" style={{ justifyContent: 'center', display: 'flex' }}>How it works</p>
-            <h2 className="h2" style={{ marginTop: 14 }}>Extract once. Keep it structured. Deliver to anyone.</h2>
+            <h2 className="h2" style={{ marginTop: 14 }}>Set it up once, then reuse it everywhere.</h2>
           </div>
         </Reveal>
         <Reveal delay={120} y={24}><Steps /></Reveal>
@@ -501,8 +500,8 @@ export default function LandingPage() {
                   One profile. Every new mind on the team.
                 </h2>
                 <p className="lead" style={{ marginTop: 18, maxWidth: 420 }}>
-                  An AI agent, a new hire, and an internal transfer all need the same context — and they
-                  read the same OCP.
+                  An AI agent, a new hire, and someone switching teams all need the same context. So they
+                  all read the same OCP.
                 </p>
               </div>
             </Reveal>
@@ -548,10 +547,10 @@ export default function LandingPage() {
           <Reveal>
             <div style={{ position: 'sticky', top: 40 }}>
               <p className="kicker">The artifact</p>
-              <h2 className="h2" style={{ marginTop: 14 }}>One document. The whole Team&nbsp;OS.</h2>
+              <h2 className="h2" style={{ marginTop: 14 }}>Everything your team runs on, in one place.</h2>
               <p className="body" style={{ marginTop: 18, maxWidth: 400 }}>
-                Read it as a friendly structured document, or flip it to the exact system prompt an
-                agent receives. Same source of truth, two surfaces.
+                Read it as a clean, structured document, or flip it to see the exact system prompt an
+                agent gets. It&apos;s the same source, shown two ways.
               </p>
             </div>
           </Reveal>
@@ -564,7 +563,7 @@ export default function LandingPage() {
         <Reveal>
           <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 40px' }}>
             <h2 className="h2">Build it around your team.</h2>
-            <p className="lead" style={{ marginTop: 14 }}>Every team is assembled differently. The OCP captures yours, block by block.</p>
+            <p className="lead" style={{ marginTop: 14 }}>No two teams run the same way. The OCP captures how yours actually does.</p>
           </div>
         </Reveal>
         <Reveal delay={120} y={24}>
@@ -579,7 +578,7 @@ export default function LandingPage() {
         <Reveal>
           <div className="h-cta">
             <h2 className="display" style={{ fontSize: 'clamp(32px,4.8cqw,58px)', maxWidth: 760, margin: '0 auto' }}>
-              Give your next teammate — human or AI — a real first day.
+              Give your next teammate a real first day, whether they&apos;re a person or an agent.
             </h2>
             <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Btn variant="ivory" href="/setup">Set up your team</Btn>
