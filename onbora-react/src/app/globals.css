@@ -689,8 +689,8 @@ a {
 .onb.dir-h .h-scn-card__t { font-family: var(--font-display); font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
 .onb.dir-h .h-scn-row { margin-bottom: 13px; }
 .onb.dir-h .h-scn-row:last-child { margin-bottom: 0; }
-.onb.dir-h .h-scn-row__k { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
-.onb.dir-h .h-scn-row__v { font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+.onb.dir-h .h-scn-row__k { display: block; font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px; }
+.onb.dir-h .h-scn-row__v { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
 
 @container onb (max-width: 860px) {
   .onb.dir-h .h-scn-grid { grid-template-columns: 1fr; gap: 36px; }

@@ -516,13 +516,13 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={140}>
               <div className="h-venn">
-                <div className="h-blob" style={{ background: 'var(--pl-coral)', left: 115, top: 0, alignItems: 'flex-start' }}>
+                <div className="h-blob" style={{ background: 'var(--pl-coral)', left: 115, top: 0, alignItems: 'flex-start', justifyContent: 'center', paddingTop: 34 }}>
                   <span className="h-blob__t">AI<br />agent</span>
                 </div>
-                <div className="h-blob" style={{ background: 'var(--pl-teal)', left: 8, top: 110, alignItems: 'flex-end' }}>
+                <div className="h-blob" style={{ background: 'var(--pl-teal)', left: 8, top: 110, alignItems: 'flex-end', justifyContent: 'flex-start', padding: '0 0 56px 40px' }}>
                   <span className="h-blob__t">New<br />employee</span>
                 </div>
-                <div className="h-blob" style={{ background: 'var(--pl-mustard)', left: 222, top: 110, alignItems: 'flex-end' }}>
+                <div className="h-blob" style={{ background: 'var(--pl-mustard)', left: 222, top: 110, alignItems: 'flex-end', justifyContent: 'flex-end', padding: '0 40px 56px 0' }}>
                   <span className="h-blob__t" style={{ color: '#2A2620' }}>Internal<br />transfer</span>
                 </div>
                 <div className="h-venn__core"><b>The OCP</b><span>one shared context</span></div>
