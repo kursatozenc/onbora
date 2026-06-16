@@ -90,6 +90,35 @@ const H_CARDS = [
   { blocks: [PL.blue, PL.rose], t: 'Living, never stale', d: 'Update the OCP once and every reader — human or AI — re-syncs to the latest version of how your team works.', dark: true },
 ];
 
+// Scenario articulation — grounded in the positioning: agents are the wedge,
+// humans are the proof. Each case names the need, the urgency, and the impact.
+const SCENARIOS = [
+  {
+    t: 'AI agent', dot: PL.coral,
+    rows: [
+      { k: 'Need', v: "An agent joins your stack with zero operating context. Memory tools recall past chats and enterprise search surfaces documents — neither tells it your goals, your norms, or the rules nobody wrote down." },
+      { k: 'Why now', v: "Teams are pushing agents into production today, hand-stuffing system prompts that drift, conflict across agents, and can't be audited. As the model commoditizes, this context becomes the product." },
+      { k: 'Impact', v: "One API call drops your operating context into any agent's system prompt — it acts in-policy from its first task, stays governable and auditable, and re-syncs the moment the rules change." },
+    ],
+  },
+  {
+    t: 'New employee', dot: PL.teal,
+    rows: [
+      { k: 'Need', v: 'New hires reverse-engineer the unwritten rules — who to ask, what "done" means, how decisions actually get made — over months.' },
+      { k: 'Why now', v: 'Every slow ramp is weeks of lost output and a shaky start — and the same operating context your agents need is the one that ramps people.' },
+      { k: 'Impact', v: 'They open one structured profile and see how the team really works on day one — ramp measured in days, not quarters.' },
+    ],
+  },
+  {
+    t: 'Internal transfer', dot: PL.mustard,
+    rows: [
+      { k: 'Need', v: "Transfers know the company but not the new team's norms, cadence, or who-to-ask." },
+      { k: 'Why now', v: "They're expected to contribute immediately while quietly re-learning context no one hands them." },
+      { k: 'Impact', v: 'They get just the deltas from their last team — norms side by side — and contribute in the first week.' },
+    ],
+  },
+];
+
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 function SVG({ children, size = 22 }: { children: React.ReactNode; size?: number }) {
@@ -480,7 +509,7 @@ export default function LandingPage() {
                   One profile. Every new mind on the team.
                 </h2>
                 <p className="lead" style={{ marginTop: 18, maxWidth: 420 }}>
-                  A new hire, an internal transfer, and an AI agent all need the same context. They all
+                  An AI agent, a new hire, and an internal transfer all need the same context — and they
                   read the same OCP.
                 </p>
               </div>
@@ -488,18 +517,36 @@ export default function LandingPage() {
             <Reveal delay={140}>
               <div className="h-venn">
                 <div className="h-blob" style={{ background: 'var(--pl-coral)', left: 115, top: 0, alignItems: 'flex-start' }}>
-                  <span className="h-blob__t">New<br />employee</span>
+                  <span className="h-blob__t">AI<br />agent</span>
                 </div>
                 <div className="h-blob" style={{ background: 'var(--pl-teal)', left: 8, top: 110, alignItems: 'flex-end' }}>
-                  <span className="h-blob__t">Internal<br />transfer</span>
+                  <span className="h-blob__t">New<br />employee</span>
                 </div>
                 <div className="h-blob" style={{ background: 'var(--pl-mustard)', left: 222, top: 110, alignItems: 'flex-end' }}>
-                  <span className="h-blob__t" style={{ color: '#2A2620' }}>AI<br />agent</span>
+                  <span className="h-blob__t" style={{ color: '#2A2620' }}>Internal<br />transfer</span>
                 </div>
                 <div className="h-venn__core"><b>The OCP</b><span>one shared context</span></div>
               </div>
             </Reveal>
           </div>
+          <Reveal delay={120} y={24}>
+            <div className="h-scn-cards">
+              {SCENARIOS.map((s, i) => (
+                <div className="h-scn-card" key={i}>
+                  <div className="h-scn-card__top">
+                    <span className="h-scn-dot" style={{ background: s.dot }} />
+                    <span className="h-scn-card__t">{s.t}</span>
+                  </div>
+                  {s.rows.map((r, j) => (
+                    <div className="h-scn-row" key={j}>
+                      <span className="h-scn-row__k">{r.k}</span>
+                      <span className="h-scn-row__v">{r.v}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
