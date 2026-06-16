@@ -18,21 +18,10 @@ function OnboraMark() {
     <Box
       component={Link}
       href="/"
-      sx={{ display: 'flex', alignItems: 'center', gap: 1.25, textDecoration: 'none' }}
+      sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
     >
-      <Box
-        sx={{
-          position: 'relative', width: 28, height: 28, borderRadius: '8px',
-          bgcolor: '#4A3FA0', display: 'grid', placeItems: 'center', flexShrink: 0,
-        }}
-      >
-        <Box component="span" sx={{ fontFamily: '"Hanken Grotesk", sans-serif', fontWeight: 700, fontSize: 17, color: '#F1E8DA', lineHeight: 1 }}>
-          O
-        </Box>
-        <Box sx={{ position: 'absolute', right: 5, bottom: 5, width: 4, height: 4, borderRadius: '50%', bgcolor: '#E6A53C' }} />
-      </Box>
       <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ letterSpacing: '-0.01em' }}>
-        Onbora
+        Onbora<Box component="span" sx={{ color: 'primary.main' }}>.</Box>
       </Typography>
     </Box>
   );

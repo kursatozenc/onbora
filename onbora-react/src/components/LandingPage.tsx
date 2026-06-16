@@ -190,11 +190,7 @@ function Reveal({
 function Wordmark() {
   return (
     <a className="wordmark" href="/" onClick={(e) => e.preventDefault()} style={{ color: 'var(--ink)' }}>
-      <span className="wordmark__mark" style={{ background: 'var(--indigo)' }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 20, lineHeight: '1', color: 'var(--ivory)', marginTop: -1, display: 'block' }}>O</span>
-        <span style={{ position: 'absolute', right: 6, bottom: 6, width: 4, height: 4, borderRadius: '50%', background: 'var(--amber)' }} />
-      </span>
-      <span className="wordmark__type">Onbora</span>
+      <span className="wordmark__type">Onbora<span style={{ color: 'var(--pl-coral)' }}>.</span></span>
     </a>
   );
 }
@@ -372,10 +368,6 @@ function Nav() {
         <a href="#how">How it works</a>
         <a href="#scenarios">Scenarios</a>
         <a href="#ocp">The OCP</a>
-      </div>
-      <div className="onb-nav__cta">
-        <Btn variant="ghost" size="sm" href="/employee">Sign in</Btn>
-        <Btn variant="primary" size="sm" href="/setup">Set up your team</Btn>
       </div>
     </nav>
   );

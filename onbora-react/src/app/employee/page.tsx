@@ -13,20 +13,9 @@ import { useOnbora } from '@/context/OnboraContext';
 // Onbora block wordmark — mirrors the landing page mark (indigo tile, amber dot).
 function OnboraMark() {
   return (
-    <Box component={Link} href="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none' }}>
-      <Box
-        sx={{
-          position: 'relative', width: 26, height: 26, borderRadius: '7px',
-          bgcolor: '#4A3FA0', display: 'grid', placeItems: 'center', flexShrink: 0,
-        }}
-      >
-        <Box component="span" sx={{ fontFamily: '"Hanken Grotesk", sans-serif', fontWeight: 700, fontSize: 16, color: '#F1E8DA', lineHeight: 1 }}>
-          O
-        </Box>
-        <Box sx={{ position: 'absolute', right: 4.5, bottom: 4.5, width: 3.5, height: 3.5, borderRadius: '50%', bgcolor: '#E6A53C' }} />
-      </Box>
+    <Box component={Link} href="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
       <Typography variant="subtitle1" fontWeight={700} color="text.primary" sx={{ letterSpacing: '-0.01em' }}>
-        Onbora
+        Onbora<Box component="span" sx={{ color: 'primary.main' }}>.</Box>
       </Typography>
     </Box>
   );
